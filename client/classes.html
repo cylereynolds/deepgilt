@@ -1,0 +1,61 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Deepgilt — choose your Gilded</title>
+<style>
+  body { margin: 0; background: #0c0a0f; color: #d8cfc0; font-family: system-ui, sans-serif; }
+  .wrap { max-width: 700px; margin: 0 auto; padding: 16px; }
+  h1 { color: #ffcf5c; font-family: Georgia, serif; font-weight: 700; font-size: 22px; margin: 0 0 2px; }
+  .sub { color: #8a7f70; font-size: 13px; margin: 0 0 16px; }
+  .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .card { background: #16130f; border: 1px solid #3a2f1e; border-radius: 10px; padding: 12px; display: flex; gap: 12px; }
+  .card canvas { width: 84px; height: 112px; flex: none; background: #0e0b12; border-radius: 8px; border: 1px solid #2a2218; }
+  .nm { color: #ffcf5c; font-size: 16px; font-weight: 500; }
+  .ar { color: #9a8f7e; font-size: 12px; margin-bottom: 4px; }
+  .pr { display: inline-block; font-size: 11px; color: #4a1b0c; background: #f5c4b3; border-radius: 999px; padding: 1px 8px; margin-bottom: 6px; }
+  .st { font-size: 12px; color: #cdbfa3; line-height: 1.5; }
+  .st b { color: #e8b84b; font-weight: 500; }
+  .play { display: inline-block; margin-top: 8px; font-size: 12px; color: #ffcf5c; text-decoration: none; border: 1px solid #6b5a2e; border-radius: 7px; padding: 4px 10px; }
+  .play:hover { background: #241d12; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Choose your Gilded</h1>
+  <p class="sub">six classes, six builds — every stat below is computed by the engine (DG.derived) for that class</p>
+  <div class="grid" id="grid"></div>
+</div>
+<script src="engine.js"></script>
+<script src="sprites.js"></script>
+<script>
+(function () {
+  var grid = document.getElementById('grid');
+  DGART.order.forEach(function (id) {
+    var cl = DGART.classes[id], d = DG.derived(cl.attrs, 24, id, {});
+    var card = document.createElement('div'); card.className = 'card';
+    var can = document.createElement('canvas'); can.width = 84; can.height = 112;
+    var cx = can.getContext('2d');
+    function drawSprite() { cx.imageSmoothingEnabled = false; cx.clearRect(0, 0, 84, 112); var sp = DGART.heroSprite(id), sc = 5; cx.drawImage(sp, (84 - sp.width * sc) / 2, (112 - sp.height * sc) / 2, sp.width * sc, sp.height * sc); }
+    drawSprite();
+    var portrait = new Image();
+    portrait.onload = function () { cx.imageSmoothingEnabled = true; cx.clearRect(0, 0, 84, 112); var s = Math.max(84 / portrait.width, 112 / portrait.height), w = portrait.width * s, h = portrait.height * s; cx.drawImage(portrait, (84 - w) / 2, (112 - h) / 2, w, h); };
+    portrait.onerror = drawSprite;
+    portrait.src = 'art/' + id + '.png';
+    card.appendChild(can);
+    var info = document.createElement('div');
+    info.innerHTML =
+      '<div class="nm">' + cl.name + '</div>' +
+      '<div class="ar">' + cl.arch + '</div>' +
+      '<span class="pr">primary: ' + cl.primary + '</span>' +
+      '<div class="st">life <b>' + d.life + '</b> &middot; charge <b>' + d.charge + '</b><br>' +
+      'bind <b>' + d.bind_capacity + '</b> &middot; geas <b>' + d.geas_length + '</b> &middot; crit <b>' + d.crit + '%</b></div>' +
+      '<a class="play" href="index.html?class=' + id + '">play as ' + cl.name.replace('The ', '') + ' &rarr;</a>';
+    card.appendChild(info);
+    grid.appendChild(card);
+  });
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,94 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Deepgilt — model viewer</title>
+<style>
+  body { margin: 0; background: #0c0a0f; color: #d8cfc0; font-family: system-ui, sans-serif; overflow: hidden; }
+  #c { display: block; width: 100vw; height: 100vh; }
+  #ui { position: absolute; left: 0; right: 0; bottom: 18px; display: flex; gap: 8px; justify-content: center; flex-wrap: wrap; }
+  button { background: #14110d; color: #ffcf5c; border: 1px solid #6b5a2e; border-radius: 9px; padding: 9px 15px; font: 500 13px system-ui; cursor: pointer; }
+  button:hover { background: #241d12; } button.on { background: #3a2f1e; border-color: #ffcf5c; }
+  #hud { position: absolute; top: 14px; left: 16px; }
+  #hud h1 { color: #ffcf5c; font: 700 18px Georgia, serif; margin: 0; }
+  #status { color: #6fcabf; font-size: 12px; margin-top: 4px; max-width: 460px; }
+</style>
+</head>
+<body>
+<canvas id="c"></canvas>
+<div id="hud"><h1>Deepgilt — model viewer</h1><div id="status">loading…</div></div>
+<div id="ui"></div>
+<script type="importmap">
+{ "imports": {
+  "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js",
+  "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"
+} }
+</script>
+<script type="module">
+import * as THREE from 'three';
+import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
+
+const params = new URLSearchParams(location.search);
+const MODEL = params.get('model') || 'art/models/bonewright3_walk.glb';
+const statusEl = document.getElementById('status');
+const canvas = document.getElementById('c');
+const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, preserveDrawingBuffer: true });
+renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
+
+const scene = new THREE.Scene();
+scene.background = new THREE.Color(0x0c0a0f);
+const camera = new THREE.PerspectiveCamera(34, innerWidth / innerHeight, 0.01, 100);
+scene.add(new THREE.AmbientLight(0x55555f, 1.4));
+const key = new THREE.DirectionalLight(0xfff0d8, 2.2); key.position.set(4, 9, 5); scene.add(key);
+const rim = new THREE.DirectionalLight(0x6f9bff, 1.0); rim.position.set(-5, 4, -6); scene.add(rim);
+const gild = new THREE.PointLight(0xe8b84b, 3, 10); gild.position.set(0, 1.2, 2); scene.add(gild);
+const ground = new THREE.Mesh(new THREE.CircleGeometry(5, 48), new THREE.MeshStandardMaterial({ color: 0x141019, roughness: 1 }));
+ground.rotation.x = -Math.PI / 2; scene.add(ground);
+
+function resize() { renderer.setSize(innerWidth, innerHeight, false); camera.aspect = innerWidth / innerHeight; camera.updateProjectionMatrix(); }
+addEventListener('resize', resize); resize();
+
+let mixer, model, current, actions = {};
+function frameModel() {
+  model.updateMatrixWorld(true);
+  const box = new THREE.Box3().setFromObject(model);
+  const size = box.getSize(new THREE.Vector3()), center = box.getCenter(new THREE.Vector3());
+  model.position.x -= center.x; model.position.z -= center.z; model.position.y -= box.min.y;  // feet on ground
+  const h = Math.max(size.y, 0.5);
+  const dist = (h / (2 * Math.tan(camera.fov * Math.PI / 360))) * 1.5;
+  camera.position.set(0, h * 0.55, dist); camera.lookAt(0, h * 0.5, 0);
+  camera.near = Math.max(dist / 200, 0.01); camera.far = dist * 12; camera.updateProjectionMatrix();
+}
+function play(name) {
+  const a = actions[name]; if (!a) return;
+  if (current && current !== a) current.fadeOut(0.25);
+  a.reset().fadeIn(0.25).play(); current = a;
+  document.querySelectorAll('#ui button').forEach(b => b.classList.toggle('on', b.dataset.n === name));
+}
+
+new GLTFLoader().load(MODEL, (g) => {
+  model = g.scene; scene.add(model); frameModel();
+  const names = g.animations.map(c => c.name);
+  window.__clips = names;
+  if (g.animations.length) {
+    mixer = new THREE.AnimationMixer(model);
+    g.animations.forEach(c => { actions[c.name] = mixer.clipAction(c); });
+    const ui = document.getElementById('ui');
+    g.animations.forEach(c => { const b = document.createElement('button'); b.dataset.n = c.name; b.textContent = c.name; b.onclick = () => play(c.name); ui.appendChild(b); });
+    play(names[0]);
+  }
+  statusEl.textContent = MODEL.split('/').pop() + ' — ' + (names.length ? 'clips: ' + names.join(', ') : 'no animation clips (static mesh)');
+  renderer.render(scene, camera);
+}, undefined, (err) => { statusEl.style.color = '#ff8a8a'; statusEl.textContent = 'load error: ' + (err && err.message ? err.message : err) + '  (' + MODEL + ')'; });
+
+const clock = new THREE.Clock();
+renderer.setAnimationLoop(() => {
+  const dt = clock.getDelta();
+  if (mixer) mixer.update(dt);
+  if (model) model.rotation.y += 0.004;
+  renderer.render(scene, camera);
+});
+</script>
+</body>
+</html>

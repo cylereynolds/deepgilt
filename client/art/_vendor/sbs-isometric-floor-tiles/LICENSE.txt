@@ -1,0 +1,9 @@
+1000+ Isometric Floor Tiles  (large 256x128 + small 128x64 floor packs)
+Author : Screaming Brain Studios
+Source : https://opengameart.org/content/1000-isometric-floor-tiles
+         (also https://screamingbrainstudios.itch.io/isotilepack)
+License: CC0 1.0 Universal (Public Domain Dedication)
+         https://creativecommons.org/publicdomain/zero/1.0/
+Attribution NOT required (CC0). Provenance kept per project policy.
+Downloaded 2026-06-17. Original files unmodified. Recolored interim
+derivatives live in client/art/env/ (t_*.png). See ../CREDITS.md.

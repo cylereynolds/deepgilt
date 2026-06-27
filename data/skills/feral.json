@@ -1,0 +1,27 @@
+{
+  "_note": "Feral skills v0 — cloned from the Bonewright schema. The Feral is the second binder (Packbind). Numbers first-pass.",
+  "class": "feral", "primary_attr": "vigor", "resource": "charge",
+  "trees": {
+    "Shift": [
+      { "id": "maul_form", "name": "Maul-form", "tier": 1, "prereq": [], "synergies": ["apex_beast"], "charge": 6, "desc": "Shift to a heavy gilt-beast; melee.", "scaling": { "stat": "steel_dmg", "base": 10, "per_rank": 5 } },
+      { "id": "feral_heart", "name": "Feral Heart", "tier": 6, "prereq": ["maul_form"], "synergies": [], "passive": true, "desc": "+life and regeneration in form.", "scaling": { "stat": "life", "base": 20, "per_rank": 10 } },
+      { "id": "stalk_form", "name": "Stalk-form", "tier": 12, "prereq": ["maul_form"], "synergies": [], "charge": 6, "desc": "Swift form; speed and crit.", "scaling": { "stat": "crit", "base": 4, "per_rank": 2 } },
+      { "id": "rend", "name": "Rend", "tier": 18, "prereq": ["maul_form"], "synergies": ["maul_form"], "charge": 12, "desc": "Bleeding bite (Rot).", "scaling": { "stat": "rot_dmg", "base": 16, "per_rank": 7 } },
+      { "id": "apex_beast", "name": "Apex Beast", "tier": 30, "prereq": ["rend"], "synergies": ["maul_form"], "charge": 25, "desc": "Capstone: a greater gilt-beast.", "scaling": { "stat": "steel_dmg", "base": 36, "per_rank": 12 } }
+    ],
+    "Packbind": [
+      { "id": "call_pack", "name": "Call Pack", "tier": 1, "prereq": [], "synergies": ["wild_legion"], "charge": 10, "desc": "Bind gilt-beasts to fight for you.", "scaling": { "stat": "servant_dmg", "base": 6, "per_rank": 3 }, "servant_hp": { "base": 35, "per_rank": 15 } },
+      { "id": "frenzy_howl", "name": "Frenzy Howl", "tier": 6, "prereq": ["call_pack"], "synergies": [], "charge": 8, "desc": "Pack gains attack speed and rage.", "scaling": { "stat": "speed_pct", "base": 12, "per_rank": 4 } },
+      { "id": "alpha_bond", "name": "Alpha Bond", "tier": 12, "prereq": ["call_pack"], "synergies": [], "passive": true, "desc": "+bind capacity; pack shares your stats.", "scaling": { "stat": "bind_capacity", "base": 1, "per_rank": 0.34 } },
+      { "id": "brood", "name": "Brood", "tier": 18, "prereq": ["call_pack"], "synergies": ["call_pack"], "charge": 16, "desc": "Beasts spawn lesser whelps on kill.", "scaling": { "stat": "servant_pct", "base": 10, "per_rank": 5 } },
+      { "id": "wild_legion", "name": "Wild Legion", "tier": 30, "prereq": ["brood"], "synergies": ["call_pack", "brood"], "charge": 40, "cooldown": 12, "desc": "Capstone: a whole pack at once.", "scaling": { "stat": "servant_dmg", "base": 20, "per_rank": 8 } }
+    ],
+    "Blight": [
+      { "id": "spore", "name": "Spore", "tier": 1, "prereq": [], "synergies": ["cataclysm"], "charge": 5, "desc": "Burst of Rot spores.", "scaling": { "stat": "rot_dmg", "base": 7, "per_rank": 4 } },
+      { "id": "bloom", "name": "Bloom", "tier": 6, "prereq": ["spore"], "synergies": [], "passive": true, "desc": "+gilt-aspect damage; spores spread.", "scaling": { "stat": "rot_pct", "base": 12, "per_rank": 6 } },
+      { "id": "galv_storm", "name": "Galv Storm", "tier": 12, "prereq": ["spore"], "synergies": ["spore"], "charge": 14, "desc": "A roaming storm of Galv.", "scaling": { "stat": "galv_dmg", "base": 14, "per_rank": 7 } },
+      { "id": "quake", "name": "Quake", "tier": 18, "prereq": ["galv_storm"], "synergies": [], "charge": 16, "desc": "Ground heaves; Steel AoE + knockdown.", "scaling": { "stat": "steel_dmg", "base": 20, "per_rank": 9 } },
+      { "id": "cataclysm", "name": "Cataclysm", "tier": 30, "prereq": ["quake"], "synergies": ["spore", "galv_storm"], "charge": 38, "cooldown": 8, "desc": "Capstone: gilt-blighted catastrophe.", "scaling": { "stat": "galv_dmg", "base": 34, "per_rank": 14 } }
+    ]
+  }
+}

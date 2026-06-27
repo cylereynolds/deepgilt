@@ -1,0 +1,25 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+.venv/
+venv/
+*.egg-info/
+
+# Node / JS
+node_modules/
+dist/
+build/
+
+# Secrets / API keys (never commit to a public repo)
+.env
+.env.*
+*.key
+*_key
+.meshy_key
+.leonardo_key
+.scenario_key
+
+# OS / editor cruft
+.DS_Store
+*.log

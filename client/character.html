@@ -1,0 +1,111 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Deepgilt — rendered character</title>
+<style>
+  body { margin: 0; background: #0c0a0f; color: #d8cfc0; font-family: system-ui, sans-serif; overflow: hidden; }
+  #wrap { position: relative; width: 100vw; height: 100vh; }
+  #c { display: block; width: 100%; height: 100%; }
+  #ui { position: absolute; left: 0; right: 0; bottom: 18px; display: flex; gap: 8px; justify-content: center; }
+  button { background: #14110d; color: #ffcf5c; border: 1px solid #6b5a2e; border-radius: 9px; padding: 9px 16px; font: 500 14px system-ui; cursor: pointer; }
+  button:hover { background: #241d12; }
+  button.on { background: #3a2f1e; border-color: #ffcf5c; }
+  #hud { position: absolute; top: 14px; left: 16px; }
+  #hud h1 { color: #ffcf5c; font: 700 20px Georgia, serif; margin: 0; }
+  #hud .s { color: #8a7f70; font-size: 12px; margin-top: 2px; max-width: 380px; }
+  #status { color: #6fcabf; font-size: 12px; margin-top: 4px; }
+</style>
+</head>
+<body>
+<div id="wrap">
+  <canvas id="c"></canvas>
+  <div id="hud">
+    <h1>Deepgilt — rendered character</h1>
+    <div class="s">real-time 3D, D2 overhead angle. placeholder model (swap for a gothic Mixamo rig later).</div>
+    <div id="status">loading three.js…</div>
+  </div>
+  <div id="ui">
+    <button data-a="Idle" class="on">Idle</button>
+    <button data-a="Walk">Walk</button>
+    <button data-a="Run">Run</button>
+    <button data-a="Attack">Attack</button>
+  </div>
+</div>
+<script type="importmap">
+{ "imports": {
+  "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js",
+  "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"
+} }
+</script>
+<script type="module">
+import * as THREE from 'three';
+import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
+
+const canvas = document.getElementById('c');
+const statusEl = document.getElementById('status');
+const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, preserveDrawingBuffer: true });
+renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
+function resize() { renderer.setSize(innerWidth, innerHeight, false); camera.aspect = innerWidth / innerHeight; camera.updateProjectionMatrix(); }
+
+const scene = new THREE.Scene();
+scene.background = new THREE.Color(0x0c0a0f);
+scene.fog = new THREE.Fog(0x0c0a0f, 9, 18);
+
+const camera = new THREE.PerspectiveCamera(32, innerWidth / innerHeight, 0.1, 100);
+camera.position.set(0, 7.5, 6.5);          // overhead three-quarter (the D2 camera)
+camera.lookAt(0, 1.2, 0);
+
+scene.add(new THREE.AmbientLight(0x3a3a48, 1.3));
+const key = new THREE.DirectionalLight(0xffcf8a, 2.4); key.position.set(4, 9, 5); scene.add(key);
+const rim = new THREE.DirectionalLight(0x6f9bff, 1.1); rim.position.set(-5, 4, -5); scene.add(rim);
+const gild = new THREE.PointLight(0xe8b84b, 6, 8); gild.position.set(0, 1.4, 1.5); scene.add(gild);
+
+const ground = new THREE.Mesh(
+  new THREE.CircleGeometry(4.2, 48),
+  new THREE.MeshStandardMaterial({ color: 0x141019, roughness: 1 }));
+ground.rotation.x = -Math.PI / 2; scene.add(ground);
+
+let mixer, model, current, actions = {};
+const MAP = { Idle: 'Idle', Walk: 'Walking', Run: 'Running', Attack: 'Punch' };
+
+function play(label) {
+  const a = actions[MAP[label]];
+  if (!a) return;
+  if (current && current !== a) current.fadeOut(0.25);
+  a.reset().fadeIn(0.25).play();
+  current = a;
+  document.querySelectorAll('#ui button').forEach(b => b.classList.toggle('on', b.dataset.a === label));
+}
+document.querySelectorAll('#ui button').forEach(b => b.addEventListener('click', () => play(b.dataset.a)));
+
+new GLTFLoader().load(
+  'https://cdn.jsdelivr.net/gh/mrdoob/three.js@r160/examples/models/gltf/RobotExpressive/RobotExpressive.glb',
+  (g) => {
+    model = g.scene;
+    model.scale.set(0.85, 0.85, 0.85);
+    scene.add(model);
+    mixer = new THREE.AnimationMixer(model);
+    g.animations.forEach(c => { actions[c.name] = mixer.clipAction(c); });
+    play('Idle');
+    statusEl.textContent = 'loaded — clips: ' + g.animations.map(c => c.name).join(', ');
+    resize();
+    renderer.render(scene, camera);   // force one frame so it shows even before the loop spins up
+  },
+  undefined,
+  (err) => { statusEl.style.color = '#ff8a8a'; statusEl.textContent = 'load error: ' + (err && err.message ? err.message : err); }
+);
+
+const clock = new THREE.Clock();
+resize();
+addEventListener('resize', resize);
+renderer.setAnimationLoop(() => {
+  const dt = clock.getDelta();
+  if (mixer) mixer.update(dt);
+  if (model) model.rotation.y += 0.004;   // slow turntable so you read the silhouette
+  renderer.render(scene, camera);
+});
+</script>
+</body>
+</html>

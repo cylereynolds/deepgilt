@@ -1,0 +1,86 @@
+{
+  "_note": "Deepgilt classes v0. Mechanics ported from D2/D&D (unprotectable); all names/flavor original. archetype_ref is provenance only, never shipped. Skill lists are samples; full lists TODO.",
+  "attributes": ["might", "finesse", "vigor", "wit", "wyrd"],
+  "classes": [
+    {
+      "id": "reaver",
+      "name": "The Reaver",
+      "archetype_ref": "barbarian/fighter",
+      "primary": "might",
+      "bind_affinity": "low",
+      "fantasy": "Frontline brute who burns gilt for rage.",
+      "trees": [
+        { "name": "Onslaught", "role": "melee actives", "skills": ["Cleave", "Bloodmill", "Sunder"] },
+        { "name": "Warcries", "role": "shouts buff allies+servants, debuff foes", "skills": ["Roar", "Ironhide", "Bloodscent"] },
+        { "name": "Bloodgilt", "role": "spend life/gilt for burst", "skills": ["Berserk", "Lifetax", "Reckoning"] }
+      ]
+    },
+    {
+      "id": "pyre",
+      "name": "The Pyre",
+      "archetype_ref": "sorceress/wizard",
+      "primary": "wit",
+      "bind_affinity": "low",
+      "fantasy": "Ranged gilt-caster; the elemental class.",
+      "trees": [
+        { "name": "Ember", "role": "fire", "skills": ["Cinderbolt", "Pyre Nova", "Conflagrate"] },
+        { "name": "Rime", "role": "cold + slow/freeze", "skills": ["Frostlance", "Rimefield", "Shatter"] },
+        { "name": "Galv", "role": "lightning + chain", "skills": ["Arcjump", "Stormcall", "Overcharge"] }
+      ]
+    },
+    {
+      "id": "bonewright",
+      "name": "The Bonewright",
+      "archetype_ref": "necromancer/warlock",
+      "primary": "wyrd",
+      "bind_affinity": "flagship",
+      "fantasy": "Binds the dead, curses the living, wields death-gilt. The PC 'write a botnet' class.",
+      "trees": [
+        { "name": "Bonecraft", "role": "summon + buff servants, raise bind capacity & geas length", "skills": ["Raise Husk", "Gilt Golem", "Bind Mastery"] },
+        { "name": "Hexes", "role": "curses/debuffs", "skills": ["Wither", "Sap", "Doom"] },
+        { "name": "Sepulture", "role": "direct death magic", "skills": ["Bone Spire", "Corpse Burst", "Reap"] }
+      ]
+    },
+    {
+      "id": "warden",
+      "name": "The Warden",
+      "archetype_ref": "paladin/cleric",
+      "primary": "might",
+      "secondary": "wyrd",
+      "bind_affinity": "low",
+      "fantasy": "Channels the Last Law (no gods, just remembered order). Auras, melee, support.",
+      "trees": [
+        { "name": "Oaths", "role": "toggled auras", "skills": ["Aura of the Lawful", "Wrathlight", "Bulwark"] },
+        { "name": "Judgment", "role": "holy-flavored melee", "skills": ["Verdict", "Sear", "Censure"] },
+        { "name": "Wards", "role": "heal/shield self, party, servants", "skills": ["Mend", "Aegis", "Hold"] }
+      ]
+    },
+    {
+      "id": "stalker",
+      "name": "The Stalker",
+      "archetype_ref": "amazon/ranger/rogue",
+      "primary": "finesse",
+      "bind_affinity": "low",
+      "fantasy": "Ranged physical, traps, venom.",
+      "trees": [
+        { "name": "Marksmanship", "role": "bow/thrown", "skills": ["Pierce Shot", "Volley", "Gilt Arrow"] },
+        { "name": "Snares", "role": "laid traps", "skills": ["Spiketrap", "Galv Mine", "Net"] },
+        { "name": "Venom", "role": "rot DoT + evasion", "skills": ["Coated Blade", "Plague Cloud", "Vanish"] }
+      ]
+    },
+    {
+      "id": "feral",
+      "name": "The Feral",
+      "archetype_ref": "druid/shapeshift-barbarian",
+      "primary": "vigor",
+      "secondary": "wyrd",
+      "bind_affinity": "high",
+      "fantasy": "Half-corrupted; shifts into gilt-beasts and binds wild husks.",
+      "trees": [
+        { "name": "Shift", "role": "werebeast forms", "skills": ["Maul-form", "Stalk-form", "Feral Heart"] },
+        { "name": "Packbind", "role": "summon gilt-beasts (second binder flavor)", "skills": ["Call Pack", "Alpha Bond", "Frenzy Howl"] },
+        { "name": "Blight", "role": "gilt-elemental/storm", "skills": ["Spore", "Galv Storm", "Quake"] }
+      ]
+    }
+  ]
+}

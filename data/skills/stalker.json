@@ -1,0 +1,27 @@
+{
+  "_note": "Stalker skills v0 — cloned from the Bonewright schema. Numbers first-pass.",
+  "class": "stalker", "primary_attr": "finesse", "resource": "charge",
+  "trees": {
+    "Marksmanship": [
+      { "id": "pierce_shot", "name": "Pierce Shot", "tier": 1, "prereq": [], "synergies": ["fusillade"], "charge": 4, "desc": "Arrow that passes through foes.", "scaling": { "stat": "steel_dmg", "base": 9, "per_rank": 4 } },
+      { "id": "gilt_arrow", "name": "Gilt Arrow", "tier": 6, "prereq": ["pierce_shot"], "synergies": [], "charge": 7, "desc": "Arrow tipped with raw gilt (Wither).", "scaling": { "stat": "wither_dmg", "base": 10, "per_rank": 5 } },
+      { "id": "volley", "name": "Volley", "tier": 12, "prereq": ["pierce_shot"], "synergies": ["pierce_shot"], "charge": 12, "desc": "Arc of arrows over an area.", "scaling": { "stat": "steel_dmg", "base": 7, "per_rank": 3 } },
+      { "id": "hawkeye", "name": "Hawkeye", "tier": 18, "prereq": ["pierce_shot"], "synergies": [], "passive": true, "desc": "+accuracy, +crit, +range.", "scaling": { "stat": "crit", "base": 4, "per_rank": 2 } },
+      { "id": "fusillade", "name": "Fusillade", "tier": 30, "prereq": ["volley"], "synergies": ["pierce_shot", "volley"], "charge": 28, "cooldown": 6, "desc": "Capstone storm of arrows.", "scaling": { "stat": "steel_dmg", "base": 30, "per_rank": 11 } }
+    ],
+    "Snares": [
+      { "id": "spiketrap", "name": "Spiketrap", "tier": 1, "prereq": [], "synergies": ["deadfall"], "charge": 6, "desc": "Lay a spike trap that triggers on approach.", "scaling": { "stat": "steel_dmg", "base": 10, "per_rank": 5 } },
+      { "id": "net", "name": "Net", "tier": 6, "prereq": ["spiketrap"], "synergies": [], "charge": 8, "desc": "Root foes in place (Finesse save).", "scaling": { "stat": "duration", "base": 2, "per_rank": 0.4 } },
+      { "id": "galv_mine", "name": "Galv Mine", "tier": 12, "prereq": ["spiketrap"], "synergies": ["spiketrap"], "charge": 12, "desc": "Proximity mine; Galv burst.", "scaling": { "stat": "galv_dmg", "base": 16, "per_rank": 7 } },
+      { "id": "bola", "name": "Bola", "tier": 18, "prereq": ["net"], "synergies": [], "charge": 10, "desc": "Thrown snare that slows and trips.", "scaling": { "stat": "slow_pct", "base": 25, "per_rank": 4 } },
+      { "id": "deadfall", "name": "Deadfall", "tier": 30, "prereq": ["galv_mine"], "synergies": ["spiketrap", "galv_mine"], "charge": 26, "desc": "Capstone trap field.", "scaling": { "stat": "steel_dmg", "base": 28, "per_rank": 10 } }
+    ],
+    "Venom": [
+      { "id": "coated_blade", "name": "Coated Blade", "tier": 1, "prereq": [], "synergies": ["pandemic"], "charge": 4, "desc": "Attacks apply stacking Rot.", "scaling": { "stat": "rot_dmg", "base": 6, "per_rank": 4 } },
+      { "id": "toxin", "name": "Toxin", "tier": 6, "prereq": ["coated_blade"], "synergies": [], "passive": true, "desc": "+Rot damage and duration.", "scaling": { "stat": "rot_pct", "base": 12, "per_rank": 6 } },
+      { "id": "plague_cloud", "name": "Plague Cloud", "tier": 12, "prereq": ["coated_blade"], "synergies": ["coated_blade"], "charge": 12, "desc": "Lingering Rot cloud.", "scaling": { "stat": "rot_dmg", "base": 12, "per_rank": 6 } },
+      { "id": "vanish", "name": "Vanish", "tier": 18, "prereq": ["toxin"], "synergies": [], "charge": 14, "cooldown": 10, "desc": "Smoke out; brief stealth + crit on exit.", "scaling": { "stat": "crit_mult", "base": 0.3, "per_rank": 0.1 } },
+      { "id": "pandemic", "name": "Pandemic", "tier": 30, "prereq": ["plague_cloud"], "synergies": ["coated_blade", "plague_cloud"], "charge": 24, "desc": "Capstone: Rot spreads on death.", "scaling": { "stat": "rot_dmg", "base": 26, "per_rank": 10 } }
+    ]
+  }
+}

@@ -1,0 +1,162 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Deepgilt — geas editor</title>
+<style>
+  body { margin: 0; background: #0c0a0f; color: #d8cfc0; font-family: system-ui, sans-serif; }
+  .wrap { max-width: 700px; margin: 0 auto; padding: 16px; }
+  h1 { color: #ffcf5c; font-family: Georgia, serif; font-weight: 700; font-size: 22px; margin: 0 0 2px; }
+  .sub { color: #8a7f70; font-size: 13px; margin: 0 0 14px; }
+  .card { background: #16130f; border: 1px solid #3a2f1e; border-radius: 10px; padding: 12px 14px; margin-bottom: 12px; }
+  .card h2 { font-size: 14px; font-weight: 500; color: #e8b84b; margin: 0 0 8px; }
+  .stmt { display: flex; gap: 6px; align-items: center; margin-bottom: 6px; }
+  .stmt .lbl { color: #8a7f70; font-size: 13px; }
+  select { background: #1d1812; color: #d8cfc0; border: 1px solid #4a3d28; border-radius: 6px; padding: 5px 7px; font: 13px system-ui; }
+  select.op { color: #ffcf5c; }
+  button { background: #1a1610; color: #ffcf5c; border: 1px solid #6b5a2e; border-radius: 7px; padding: 6px 10px; font: 500 13px system-ui; cursor: pointer; }
+  button:hover { background: #241d12; }
+  .icon { padding: 4px 8px; color: #9a8f7e; }
+  .row { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+  .meter { height: 12px; background: #1d1812; border: 1px solid #3a2f1e; border-radius: 6px; overflow: hidden; flex: 1; min-width: 120px; }
+  .meter > div { height: 100%; background: #1d9e75; transition: width .15s, background .15s; }
+  .meter.over > div { background: #c0303a; }
+  canvas { width: 100%; display: block; border-radius: 8px; border: 1px solid #2a2218; image-rendering: pixelated; background: #0c0a0f; }
+  textarea { width: 100%; box-sizing: border-box; background: #0e0b12; color: #9fd9c8; border: 1px solid #3a2f1e; border-radius: 8px; font: 12px ui-monospace, monospace; padding: 8px; height: 132px; resize: vertical; }
+  .ok { color: #7be0a4; } .bad { color: #ff8a8a; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Geas editor</h1>
+  <p class="sub">assemble a servant's behavior, watch it run, and see the Wyrd budget gate it — the botting layer as a tool</p>
+
+  <div class="card">
+    <h2>Binder capacity</h2>
+    <div class="row">
+      <span class="lbl" style="font-size:13px;color:#8a7f70">Wyrd</span>
+      <input id="wyrd" type="range" min="0" max="120" value="60" style="flex:1;min-width:120px;accent-color:#e8b84b">
+      <span style="font-size:13px">geas length <b id="cap" style="color:#e8b84b">10</b></span>
+    </div>
+    <div class="row" style="margin-top:8px">
+      <div class="meter" id="meter"><div id="meterfill" style="width:0%"></div></div>
+      <span style="font-size:13px"><b id="used">0</b>/<b id="capn">10</b></span>
+      <span id="valid" class="ok" style="font-size:13px">OK</span>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>The geas — runs top to bottom, every tick</h2>
+    <div id="prog"></div>
+    <button id="add" style="margin-top:6px">+ add statement</button>
+    <button id="tpl" style="margin-top:6px">load farm template</button>
+  </div>
+
+  <div class="card">
+    <h2>Live — your servant, running this geas</h2>
+    <div class="row" style="margin-bottom:6px;font-size:13px">
+      <span>depth <b id="d-depth" style="color:#e8b84b">1</b></span>
+      <span>gilt <b id="d-gilt" style="color:#e8b84b">0</b></span>
+      <span>servant hp <b id="d-hp" style="color:#6fcabf">100</b></span>
+    </div>
+    <canvas id="sim"></canvas>
+  </div>
+
+  <div class="card">
+    <h2>Geas-scroll <span style="color:#8a7f70;font-weight:400;font-size:12px">— Python-engine compatible; share or trade it</span></h2>
+    <textarea id="scroll" readonly></textarea>
+  </div>
+  <div id="err" style="color:#e88;font-size:14px;display:none"></div>
+</div>
+<script src="engine.js"></script>
+<script>
+(function () {
+var PAL={K:'#0a0a0f',r:'#7d1f2b',R:'#b0303a',w:'#d8cfc0',g:'#e8b84b',y:'#fff0b8',t:'#6fcabf',T:'#2f6b64'};
+var PSV=Object.assign({},PAL,{r:'#2f6b64',R:'#6fcabf',w:'#cfeee9'});
+var HUSK=["....KKK.....","...KrrrK....","..KrRRRrK...","..KrRKKRrK..","..KrRRRRrK..","..KrwwwwrK..","..KrrRRrrK..","..Krr..rrK..","..KrrrrrrK..","..Krr..rrK..","...KK..KK..."];
+var COIN=[".ggggg.","gyyyyyg","gyyyyyg","gyyyyyg","gyyyyyg","gyyyyyg",".ggggg."];
+function hexc(c){return[parseInt(c.slice(1,3),16),parseInt(c.slice(3,5),16),parseInt(c.slice(5,7),16)];}
+function mk(rows,pal){var h=rows.length,w=rows[0].length,c=document.createElement('canvas');c.width=w;c.height=h;var x=c.getContext('2d'),im=x.createImageData(w,h);for(var j=0;j<h;j++)for(var i=0;i<w;i++){var col=pal[rows[j][i]],o=(j*w+i)*4;if(!col){im.data[o+3]=0;continue;}var rg=hexc(col);im.data[o]=rg[0];im.data[o+1]=rg[1];im.data[o+2]=rg[2];im.data[o+3]=255;}x.putImageData(im,0,0);return c;}
+var S=3,sHusk=mk(HUSK,PAL),sServ=mk(HUSK,PSV),sCoin=mk(COIN,PAL);
+var cv=document.getElementById('sim'),ctx=cv.getContext('2d'),CW=660,CH=150;cv.width=CW;cv.height=CH;
+
+var WHENS=[['always','always'],['enemies>0','enemies present'],['floorClear','floor clear'],['hp<30%','my hp < 30%'],['hp<50%','my hp < 50%']];
+var OPS=[['ATTACK','attack nearest'],['GRAB','grab gilt'],['RETREAT','retreat & heal'],['DESCEND','descend when clear'],['GUARD','guard'],['WAIT','wait']];
+var FARM=[{when:'hp<30%',op:'RETREAT'},{when:'enemies>0',op:'ATTACK'},{when:'floorClear',op:'GRAB'},{when:'floorClear',op:'DESCEND'}];
+var prog=FARM.map(function(s){return{when:s.when,op:s.op};});
+
+function sel(opts,val,cls){var s=document.createElement('select');if(cls)s.className=cls;opts.forEach(function(o){var e=document.createElement('option');e.value=o[0];e.textContent=o[1];if(o[0]===val)e.selected=true;s.appendChild(e);});return s;}
+function renderProg(){
+  var box=document.getElementById('prog');box.innerHTML='';
+  prog.forEach(function(st,i){
+    var row=document.createElement('div');row.className='stmt';
+    var l1=document.createElement('span');l1.className='lbl';l1.textContent='when';row.appendChild(l1);
+    var sw=sel(WHENS,st.when);sw.onchange=function(){st.when=sw.value;refresh();};row.appendChild(sw);
+    var l2=document.createElement('span');l2.className='lbl';l2.textContent='do';row.appendChild(l2);
+    var so=sel(OPS,st.op,'op');so.onchange=function(){st.op=so.value;refresh();};row.appendChild(so);
+    var up=document.createElement('button');up.className='icon';up.textContent='↑';up.onclick=function(){if(i>0){var t=prog[i-1];prog[i-1]=prog[i];prog[i]=t;renderProg();refresh();}};row.appendChild(up);
+    var dn=document.createElement('button');dn.className='icon';dn.textContent='↓';dn.onclick=function(){if(i<prog.length-1){var t=prog[i+1];prog[i+1]=prog[i];prog[i]=t;renderProg();refresh();}};row.appendChild(dn);
+    var rm=document.createElement('button');rm.className='icon';rm.textContent='✕';rm.onclick=function(){prog.splice(i,1);renderProg();refresh();};row.appendChild(rm);
+    box.appendChild(row);
+  });
+}
+function compile(){return prog.map(function(s){return s.when==='always'?{op:s.op,args:{}}:{IF:{condition:s.when,then:[{op:s.op,args:{}}]}};});}
+function cap(){return 3+Math.floor((+document.getElementById('wyrd').value)/8);}
+function refresh(){
+  var geas=compile();var c=cap();var v=DG.validateGeas(geas,c);
+  document.getElementById('cap').textContent=c;document.getElementById('capn').textContent=c;
+  document.getElementById('used').textContent=v.used;
+  var pct=Math.min(100,Math.round(v.used/c*100));document.getElementById('meterfill').style.width=pct+'%';
+  document.getElementById('meter').className='meter'+(v.ok?'':' over');
+  var vl=document.getElementById('valid');vl.textContent=v.ok?'OK':'REJECTED — '+v.errors[0];vl.className=v.ok?'ok':'bad';
+  document.getElementById('scroll').value=JSON.stringify({name:'my_geas',author:'you',geas:geas},null,2);
+}
+document.getElementById('add').onclick=function(){prog.push({when:'always',op:'WAIT'});renderProg();refresh();};
+document.getElementById('tpl').onclick=function(){prog=FARM.map(function(s){return{when:s.when,op:s.op};});renderProg();refresh();};
+document.getElementById('wyrd').oninput=refresh;
+
+// ---- live sim (servant runs the live program) ----
+var HBASE={id:'husk',hp:34,dmg:6,level:2,armor:12,resist:{}};
+var W={en:[],gl:[],depth:1,gilt:0};
+var SV={x:CW/2,y:CH/2,hp:100,mhp:100,dmg:11,spd:2.3,home:{x:40,y:CH-30}};
+function rr(a,b){return a+Math.random()*(b-a);}
+function dist(a,b){return Math.hypot(a.x-b.x,a.y-b.y);}
+function toward(a,b,s){var d=dist(a,b)||1;a.x+=(b.x-a.x)/d*(s||SV.spd);a.y+=(b.y-a.y)/d*(s||SV.spd);}
+function live(l){return l.filter(function(e){return e.hp>0;});}
+function nearest(l,p){var b=null,bd=1e9;for(var i=0;i<l.length;i++){if(l[i].hp!==undefined&&l[i].hp<=0)continue;if(l[i].amt!==undefined&&l[i].amt<=0)continue;var d=dist(l[i],p);if(d<bd){bd=d;b=l[i];}}return b;}
+function spawn(){var m=(window.DG?DG.scaleMon(HBASE,W.depth):HBASE);W.en=[];for(var i=0;i<3+ (W.depth>2?1:0);i++)W.en.push({x:rr(60,CW-40),y:rr(25,CH-25),hp:m.hp,mhp:m.hp,dmg:m.dmg});W.gl=[{x:rr(60,CW-60),y:rr(25,CH-25),amt:6+W.depth},{x:rr(60,CW-60),y:rr(25,CH-25),amt:5+W.depth}];}
+function cond(w){if(w==='always')return true;if(w==='enemies>0')return live(W.en).length>0;if(w==='floorClear')return live(W.en).length===0;if(w==='hp<30%')return SV.hp<SV.mhp*0.3;if(w==='hp<50%')return SV.hp<SV.mhp*0.5;return true;}
+function exec(op){
+  if(op==='ATTACK'||op==='GUARD'){var t=nearest(W.en,SV);if(t){if(dist(SV,t)>15)toward(SV,t);else{t.hp-=SV.dmg;}}}
+  else if(op==='GRAB'){var g=nearest(W.gl,SV);if(g){if(dist(SV,g)>15)toward(SV,g);else{W.gilt+=g.amt;g.amt=0;}}}
+  else if(op==='RETREAT'){if(dist(SV,SV.home)>4)toward(SV,SV.home);SV.hp=Math.min(SV.mhp,SV.hp+0.7);}
+  else if(op==='DESCEND'){if(live(W.en).length===0&&!W.gl.some(function(g){return g.amt>0;})){W.depth++;spawn();SV.x=CW/2;SV.y=CH/2;SV.hp=Math.min(SV.mhp,SV.hp+8);}}
+}
+function sim(){
+  for(var i=0;i<prog.length;i++){if(cond(prog[i].when))exec(prog[i].op);}
+  for(var k=0;k<W.en.length;k++){var e=W.en[k];if(e.hp<=0)continue;if(dist(e,SV)>18)toward(e,SV,0.9);else SV.hp-=0.5;}
+  for(var m=W.en.length-1;m>=0;m--){if(W.en[m].hp<=0){W.gl.push({x:W.en[m].x,y:W.en[m].y,amt:3+W.depth});W.en.splice(m,1);}}
+  W.gl=W.gl.filter(function(g){return g.amt>0;});
+  if(SV.hp<=0){SV.hp=SV.mhp;SV.x=SV.home.x;SV.y=SV.home.y;}
+  document.getElementById('d-depth').textContent=W.depth;document.getElementById('d-gilt').textContent=W.gilt;document.getElementById('d-hp').textContent=Math.max(0,Math.round(SV.hp));
+}
+function blit(sp,x,y){var w=sp.width*S,h=sp.height*S;ctx.imageSmoothingEnabled=false;ctx.drawImage(sp,(x-w/2)|0,(y-h/2)|0,w,h);}
+function draw(){
+  ctx.fillStyle='#0c0a0f';ctx.fillRect(0,0,CW,CH);
+  ctx.strokeStyle='#1b1622';ctx.lineWidth=1;for(var gx=0;gx<CW;gx+=24){ctx.beginPath();ctx.moveTo(gx,0);ctx.lineTo(gx,CH);ctx.stroke();}for(var gy=0;gy<CH;gy+=24){ctx.beginPath();ctx.moveTo(0,gy);ctx.lineTo(CW,gy);ctx.stroke();}
+  for(var i=0;i<W.gl.length;i++)if(W.gl[i].amt>0)blit(sCoin,W.gl[i].x,W.gl[i].y);
+  for(var k=0;k<W.en.length;k++)if(W.en[k].hp>0)blit(sHusk,W.en[k].x,W.en[k].y);
+  blit(sServ,SV.x,SV.y);
+  var hw=46,hh=5;ctx.fillStyle='#2a0a0e';ctx.fillRect(SV.x-hw/2,SV.y-26,hw,hh);ctx.fillStyle='#6fcabf';ctx.fillRect(SV.x-hw/2,SV.y-26,hw*Math.max(0,SV.hp/SV.mhp),hh);
+}
+function loop(){sim();draw();requestAnimationFrame(loop);}
+
+try{
+  if(typeof DG==='undefined')throw new Error('engine.js not loaded');
+  renderProg();refresh();spawn();loop();
+}catch(e){var el=document.getElementById('err');el.style.display='block';el.textContent='Run via a local server (python3 -m http.server from the project root, open /client/geas-editor.html). ['+e.message+']';}
+})();
+</script>
+</body>
+</html>

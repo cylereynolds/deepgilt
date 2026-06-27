@@ -1,0 +1,27 @@
+{
+  "_note": "Reaver skills v0 — cloned from the Bonewright schema. Numbers first-pass.",
+  "class": "reaver", "primary_attr": "might", "resource": "charge",
+  "trees": {
+    "Onslaught": [
+      { "id": "cleave", "name": "Cleave", "tier": 1, "prereq": [], "synergies": ["rive"], "charge": 6, "desc": "Wide melee arc hitting several foes.", "scaling": { "stat": "steel_dmg", "base": 10, "per_rank": 4 } },
+      { "id": "sunder", "name": "Sunder", "tier": 6, "prereq": ["cleave"], "synergies": [], "charge": 8, "desc": "Heavy blow that breaks armor.", "scaling": { "stat": "minus_armor", "base": 15, "per_rank": 4 } },
+      { "id": "bloodmill", "name": "Bloodmill", "tier": 12, "prereq": ["cleave"], "synergies": ["rive"], "charge": 12, "desc": "Spin through a crowd while moving.", "scaling": { "stat": "steel_dmg", "base": 8, "per_rank": 3 } },
+      { "id": "rive", "name": "Rive", "tier": 18, "prereq": ["cleave"], "synergies": [], "charge": 14, "desc": "Leaping smash with knockback.", "scaling": { "stat": "steel_dmg", "base": 22, "per_rank": 9 } },
+      { "id": "maelstrom", "name": "Maelstrom", "tier": 30, "prereq": ["bloodmill"], "synergies": ["bloodmill", "rive"], "charge": 30, "cooldown": 8, "desc": "Capstone whirlwind cataclysm.", "scaling": { "stat": "steel_dmg", "base": 40, "per_rank": 12 } }
+    ],
+    "Warcries": [
+      { "id": "roar", "name": "Roar", "tier": 1, "prereq": [], "synergies": [], "charge": 5, "desc": "Shout: party and servants gain damage.", "scaling": { "stat": "dmg_pct", "base": 8, "per_rank": 3 } },
+      { "id": "ironhide", "name": "Ironhide", "tier": 6, "prereq": ["roar"], "synergies": [], "passive": true, "desc": "+armor to self and your servants.", "scaling": { "stat": "armor", "base": 20, "per_rank": 10 } },
+      { "id": "bloodscent", "name": "Bloodscent", "tier": 12, "prereq": ["roar"], "synergies": [], "charge": 7, "desc": "Cursed foes bleed and take more Steel.", "scaling": { "stat": "phys_taken_pct", "base": 12, "per_rank": 3 } },
+      { "id": "warbanner", "name": "Warbanner", "tier": 24, "prereq": ["roar"], "synergies": [], "charge": 18, "desc": "Planted banner buffs an area.", "scaling": { "stat": "dmg_pct", "base": 15, "per_rank": 4 } },
+      { "id": "doomshout", "name": "Doomshout", "tier": 30, "prereq": ["bloodscent"], "synergies": ["roar"], "charge": 22, "desc": "Capstone fear + armor-break shout.", "scaling": { "stat": "minus_armor", "base": 30, "per_rank": 5 } }
+    ],
+    "Bloodgilt": [
+      { "id": "berserk", "name": "Berserk", "tier": 1, "prereq": [], "synergies": [], "charge": 4, "desc": "Trade defense for Steel + Wither burst.", "scaling": { "stat": "wither_dmg", "base": 8, "per_rank": 5 } },
+      { "id": "lifetax", "name": "Lifetax", "tier": 6, "prereq": ["berserk"], "synergies": [], "passive": true, "desc": "Spend life on hit for extra damage.", "scaling": { "stat": "dmg_pct", "base": 10, "per_rank": 4 } },
+      { "id": "reckoning", "name": "Reckoning", "tier": 18, "prereq": ["berserk"], "synergies": [], "charge": 12, "desc": "Burst that scales with missing life.", "scaling": { "stat": "steel_dmg", "base": 20, "per_rank": 8 } },
+      { "id": "sanguine", "name": "Sanguine", "tier": 24, "prereq": ["lifetax"], "synergies": [], "passive": true, "desc": "Leech overheals into a shield.", "scaling": { "stat": "leech", "base": 4, "per_rank": 2 } },
+      { "id": "apex", "name": "Apex", "tier": 30, "prereq": ["reckoning"], "synergies": ["berserk", "reckoning"], "charge": 25, "desc": "Capstone blood frenzy.", "scaling": { "stat": "dmg_pct", "base": 40, "per_rank": 10 } }
+    ]
+  }
+}

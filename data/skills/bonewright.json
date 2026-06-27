@@ -1,0 +1,33 @@
+{
+  "_note": "Bonewright — full skill list v0 (the reference all other classes copy). Mechanics = D2 skill model (ranks, prereqs, synergies, level gates); names/flavor original. tier = character level required. charge = cost. scaling.base/per_rank drive the primary effect. Numbers are first-pass.",
+  "class": "bonewright",
+  "primary_attr": "wyrd",
+  "resource": "charge",
+  "trees": {
+    "Bonecraft": [
+      { "id": "raise_husk", "name": "Raise Husk", "tier": 1, "prereq": [], "synergies": ["husk_vigor", "bind_mastery"], "charge": 8, "cooldown": 0, "desc": "Bind a slain corpse into a husk servant.", "scaling": { "stat": "servant_dmg", "base": 6, "per_rank": 3 }, "servant_hp": { "base": 40, "per_rank": 18 } },
+      { "id": "husk_vigor", "name": "Husk Vigor", "tier": 6, "prereq": ["raise_husk"], "synergies": [], "passive": true, "desc": "All servants gain life and damage.", "scaling": { "stat": "servant_pct", "base": 10, "per_rank": 8 } },
+      { "id": "bind_mastery", "name": "Bind Mastery", "tier": 6, "prereq": ["raise_husk"], "synergies": [], "passive": true, "desc": "+bind capacity and +geas length.", "scaling": { "stat": "bind_capacity", "base": 1, "per_rank": 0.34 }, "geas_length_per_3_ranks": 1 },
+      { "id": "soul_tithe", "name": "Soul Tithe", "tier": 12, "prereq": ["raise_husk"], "synergies": [], "passive": true, "desc": "Servants return gilt when they kill.", "scaling": { "stat": "gilt_on_kill", "base": 2, "per_rank": 1 } },
+      { "id": "gilt_golem", "name": "Gilt Golem", "tier": 12, "prereq": ["raise_husk", "bind_mastery"], "synergies": ["husk_vigor"], "charge": 25, "cooldown": 6, "desc": "Bind one heavy golem from raw gilt; taunts and tanks.", "scaling": { "stat": "servant_dmg", "base": 14, "per_rank": 6 }, "servant_hp": { "base": 180, "per_rank": 60 } },
+      { "id": "alpha_geas", "name": "Alpha Geas", "tier": 24, "prereq": ["bind_mastery"], "synergies": [], "passive": true, "desc": "+geas length; servants act faster.", "scaling": { "stat": "geas_length", "base": 1, "per_rank": 0.5 } },
+      { "id": "mass_raise", "name": "Mass Raise", "tier": 30, "prereq": ["raise_husk", "gilt_golem"], "synergies": ["husk_vigor", "bind_mastery"], "charge": 45, "cooldown": 12, "desc": "Raise every nearby corpse at once.", "scaling": { "stat": "corpses", "base": 3, "per_rank": 0.5 } }
+    ],
+    "Hexes": [
+      { "id": "lay_bare", "name": "Lay Bare", "tier": 1, "prereq": [], "synergies": [], "charge": 5, "cooldown": 0, "desc": "Curse: target takes more Steel damage.", "scaling": { "stat": "phys_taken_pct", "base": 30, "per_rank": 6 } },
+      { "id": "wither_curse", "name": "Wither", "tier": 6, "prereq": ["lay_bare"], "synergies": [], "charge": 7, "cooldown": 0, "desc": "Curse: -resistances and -armor.", "scaling": { "stat": "minus_resist", "base": 15, "per_rank": 3 } },
+      { "id": "sap", "name": "Sap", "tier": 12, "prereq": ["lay_bare"], "synergies": [], "charge": 7, "cooldown": 0, "desc": "Curse: cursed foes deal less damage.", "scaling": { "stat": "dmg_reduce_pct", "base": 20, "per_rank": 4 } },
+      { "id": "terror", "name": "Terror", "tier": 12, "prereq": ["wither_curse"], "synergies": [], "charge": 9, "cooldown": 0, "desc": "Curse: foes flee (Wyrd save negates).", "scaling": { "stat": "duration", "base": 2, "per_rank": 0.4 } },
+      { "id": "doom", "name": "Doom", "tier": 24, "prereq": ["sap", "wither_curse"], "synergies": [], "charge": 14, "cooldown": 0, "desc": "Heavy single-target curse stacking -resist and -damage.", "scaling": { "stat": "minus_resist", "base": 35, "per_rank": 5 } },
+      { "id": "enfeeble", "name": "Enfeeble", "tier": 30, "prereq": ["doom"], "synergies": ["sap", "wither_curse"], "charge": 20, "cooldown": 0, "desc": "Capstone curse: slow + -damage + -resist, large radius.", "scaling": { "stat": "slow_pct", "base": 25, "per_rank": 3 } }
+    ],
+    "Sepulture": [
+      { "id": "bone_spire", "name": "Bone Spire", "tier": 1, "prereq": [], "synergies": ["grave_spike", "sepulcher"], "charge": 6, "cooldown": 0, "desc": "Hurl a spire of gilt-bone; Wither damage, partial armor-pierce.", "scaling": { "stat": "wither_dmg", "base": 8, "per_rank": 5 } },
+      { "id": "bone_shield", "name": "Bone Shield", "tier": 6, "prereq": ["bone_spire"], "synergies": [], "charge": 12, "cooldown": 10, "desc": "Absorb a flat amount of damage.", "scaling": { "stat": "absorb", "base": 30, "per_rank": 14 } },
+      { "id": "corpse_burst", "name": "Corpse Burst", "tier": 6, "prereq": ["bone_spire"], "synergies": [], "charge": 10, "cooldown": 0, "desc": "Detonate a corpse for Steel+Rot AoE.", "scaling": { "stat": "aoe_dmg", "base": 18, "per_rank": 8 } },
+      { "id": "reap", "name": "Reap", "tier": 12, "prereq": ["bone_spire"], "synergies": ["bone_spire"], "charge": 13, "cooldown": 2, "desc": "Cone of Wither that heals you for a share of damage.", "scaling": { "stat": "wither_dmg", "base": 16, "per_rank": 7 } },
+      { "id": "grave_spike", "name": "Grave Spike", "tier": 24, "prereq": ["reap"], "synergies": ["bone_spire"], "charge": 18, "cooldown": 4, "desc": "Erupting AoE spires from the ground.", "scaling": { "stat": "wither_dmg", "base": 30, "per_rank": 10 } },
+      { "id": "sepulcher", "name": "Sepulcher", "tier": 30, "prereq": ["grave_spike"], "synergies": ["bone_spire", "grave_spike"], "charge": 35, "cooldown": 8, "desc": "Capstone: collapse the dead into a Wither cataclysm.", "scaling": { "stat": "wither_dmg", "base": 70, "per_rank": 18 } }
+    ]
+  }
+}

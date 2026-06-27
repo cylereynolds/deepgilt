@@ -1,0 +1,17 @@
+{
+  "_note": "Sigils = our runes (the components that socket into gear and combine into geas-words). D2 rune model: a sigil grants a different bonus in a weapon vs in armor. level = required item level to socket. Reference data; geas-word recipes in geaswords.json cite these ids in order.",
+  "sigils": [
+    { "id": "Au",   "name": "Au",   "level": 1,  "weapon": { "stat": "accuracy", "val": 40 },     "armor": { "stat": "life", "val": 15 } },
+    { "id": "Mor",  "name": "Mor",  "level": 8,  "weapon": { "stat": "leech", "val": 5 },          "armor": { "stat": "charge", "val": 15 } },
+    { "id": "Sol",  "name": "Sol",  "level": 12, "weapon": { "stat": "flat_steel", "val": 9 },     "armor": { "stat": "armor", "val": 40 } },
+    { "id": "Ven",  "name": "Ven",  "level": 16, "weapon": { "stat": "rot_dmg", "val": 18 },       "armor": { "stat": "res_rot", "val": 25 } },
+    { "id": "Eth",  "name": "Eth",  "level": 17, "weapon": { "stat": "minus_armor", "val": 25 },   "armor": { "stat": "charge_regen", "val": 15 } },
+    { "id": "Var",  "name": "Var",  "level": 19, "weapon": { "stat": "ember_dmg", "val": 22 },     "armor": { "stat": "res_ember", "val": 30 } },
+    { "id": "Ix",   "name": "Ix",   "level": 22, "weapon": { "stat": "attack_speed", "val": 20 },  "armor": { "stat": "finesse", "val": 10 } },
+    { "id": "Nyx",  "name": "Nyx",  "level": 25, "weapon": { "stat": "wither_dmg", "val": 24 },    "armor": { "stat": "cannot_freeze", "val": 1 } },
+    { "id": "Cor",  "name": "Cor",  "level": 27, "weapon": { "stat": "galv_dmg", "val": 30 },      "armor": { "stat": "res_galv", "val": 30 } },
+    { "id": "Gol",  "name": "Gol",  "level": 31, "weapon": { "stat": "ed_pct", "val": 50 },        "armor": { "stat": "all_attrs", "val": 8 } },
+    { "id": "Ruin", "name": "Ruin", "level": 35, "weapon": { "stat": "wither_on_hit", "val": 15 }, "armor": { "stat": "max_resist", "val": 5 } },
+    { "id": "Wyr",  "name": "Wyr",  "level": 40, "weapon": { "stat": "plus_skills", "val": 1 },    "armor": { "stat": "bind_capacity", "val": 1 } }
+  ]
+}

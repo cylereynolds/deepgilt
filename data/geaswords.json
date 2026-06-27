@@ -1,0 +1,29 @@
+{
+  "_note": "Geas-words = our runewords. An ordered sigil recipe in a base with matching socket count and type forms a named power. 'mods' are engine-applied numeric bonuses (keys = engine stat keys; attrs go to attributes, rest to gear). 'bonuses' is the human-readable list. level = required.",
+  "geaswords": [
+    { "name": "Tithe", "sigils": ["Au","Mor"], "bases": ["weapon"], "sockets": 2, "level": 12,
+      "mods": { "leech": 6, "gilt_sight": 25, "accuracy": 40 },
+      "bonuses": ["+6% life leech", "+25% gilt-sight", "+40 accuracy"] },
+    { "name": "Quickhand", "sigils": ["Ix","Ix"], "bases": ["weapon","gloves"], "sockets": 2, "level": 22,
+      "mods": { "attack_speed": 40, "finesse": 10 },
+      "bonuses": ["+40% attack speed", "+10 Finesse"] },
+    { "name": "Plaguebrand", "sigils": ["Ven","Nyx"], "bases": ["weapon"], "sockets": 2, "level": 25,
+      "mods": { "rot_dmg": 18, "wither_dmg": 24 },
+      "bonuses": ["adds Rot damage", "adds Wither damage"] },
+    { "name": "Ironvow", "sigils": ["Sol","Sol","Gol"], "bases": ["body"], "sockets": 3, "level": 31,
+      "mods": { "armor": 80, "all_attrs": 8 },
+      "bonuses": ["+80 armor", "+8 all attributes"] },
+    { "name": "Lastlight", "sigils": ["Sol","Var","Eth"], "bases": ["body","helm"], "sockets": 3, "level": 27,
+      "mods": { "res_all": 20, "armor": 40, "cannot_freeze": 1 },
+      "bonuses": ["+20% all resist", "+40 armor", "cannot be frozen"] },
+    { "name": "Stormvein", "sigils": ["Cor","Cor","Ix"], "bases": ["weapon"], "sockets": 3, "level": 30,
+      "mods": { "galv_dmg": 60, "attack_speed": 20 },
+      "bonuses": ["heavy Galv damage", "+20% attack speed"] },
+    { "name": "Wyrdcall", "sigils": ["Wyr","Gol","Mor"], "bases": ["body"], "sockets": 3, "level": 40,
+      "mods": { "plus_skills": 1, "bind_capacity": 1, "all_attrs": 8, "charge": 15 },
+      "bonuses": ["+1 to all skills", "+1 bind capacity", "+8 all attributes", "+15 charge"] },
+    { "name": "Hollowmaw", "sigils": ["Nyx","Nyx","Gol","Ruin"], "bases": ["weapon"], "sockets": 4, "level": 42,
+      "mods": { "ed_pct": 50, "wither_dmg": 48, "wither_on_hit": 15 },
+      "bonuses": ["+50% enhanced damage", "heavy Wither damage", "15% chance on hit to bind the slain"] }
+  ]
+}

@@ -1,0 +1,14 @@
+{
+  "name": "husk_farm",
+  "author": "Vael",
+  "_desc": "Clear the floor, loot gilt, retreat when hurt, descend. A shareable PC geas-scroll — the kind players would trade.",
+  "geas": [
+    { "IF": { "condition": "hp<30%", "then": [ { "op": "RETREAT", "args": { "to": "leader", "ifHpBelow": 30 } } ] } },
+    { "IF": { "condition": "enemies>0",
+              "then": [ { "op": "HUNT", "args": { "filter": "enemy", "select": "nearest" } },
+                        { "op": "USE", "args": { "skillSlot": 1, "condition": "enemies>2" } },
+                        { "op": "ATTACK", "args": { "target": "nearest_enemy" } } ],
+              "else": [ { "op": "GRAB", "args": { "filter": "gilt", "range": 600 } },
+                        { "op": "DESCEND", "args": { "whenFloorClear": true } } ] } }
+  ]
+}

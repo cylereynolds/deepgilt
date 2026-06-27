@@ -1,0 +1,48 @@
+{
+  "_note": "The geas instruction set — Deepgilt's botting layer as content. A servant runs its geas (ordered instructions) every tick. Mobile uses fixed presets; PC exposes the full editor (the sanctioned scripting / Screeps pillar). geas_length (instruction + conditional budget) scales with Wyrd + Bonecraft skills.",
+
+  "targets": ["self", "leader", "cursor", "nearest_enemy", "weakest_enemy", "strongest_enemy", "nearest_elite", "nearest_gilt", "nearest_item", "point"],
+
+  "filters": ["enemy", "elite", "boss", "gilt", "item", "ally", "servant"],
+
+  "instructions": [
+    { "op": "MOVE_TO",  "params": ["target"],                 "desc": "Path toward a target or point." },
+    { "op": "FOLLOW",   "params": ["target=leader", "range"], "desc": "Stay within range of a target (default the binder)." },
+    { "op": "HUNT",     "params": ["filter=enemy", "select=nearest", "range"], "desc": "Acquire and pursue a target matching filter." },
+    { "op": "ATTACK",   "params": ["target", "skillSlot=basic"], "desc": "Strike target with a basic or assigned skill." },
+    { "op": "USE",      "params": ["skillSlot", "condition"],  "desc": "Use a skill when condition holds (e.g., off cooldown, target hp<50%)." },
+    { "op": "GRAB",     "params": ["filter=gilt", "range"],    "desc": "Walk over and collect gilt/items in range (gilt only on mobile)." },
+    { "op": "GUARD",    "params": ["point", "radius"],         "desc": "Hold a position; engage anything entering radius." },
+    { "op": "RETREAT",  "params": ["to=leader", "ifHpBelow"],  "desc": "Disengage and fall back when own hp < threshold." },
+    { "op": "WAIT",     "params": ["condition|ticks"],         "desc": "Idle until a condition or duration passes." },
+    { "op": "DESCEND",  "params": ["whenFloorClear=true"],     "desc": "PC-only: take the rift to the next depth when the floor is cleared (self-farming)." }
+  ],
+
+  "control_flow": {
+    "_note": "PC editor only; mobile presets are flat sequences.",
+    "IF":     { "params": ["condition", "then[]", "else[]"], "desc": "Branch on a condition." },
+    "REPEAT": { "params": ["body[]"],                        "desc": "Loop the body each tick (default wrapper)." },
+    "conditions": ["hp<%X", "charge<%X", "enemies>N", "enemyWithin(range)", "leaderWithin(range)", "carrying>=N", "floorClear", "isNight"]
+  },
+
+  "platform_rules": {
+    "mobile": "Preset geas only. No custom editor, no DESCEND, items not auto-grabbed. Behaves like a merc/minion AI — keeps mobile free of custom automation by design.",
+    "pc": "Full editor: compose instructions + IF/REPEAT, save as shareable/sellable 'geas-scrolls'. This is the sanctioned botting layer."
+  },
+
+  "presets": [
+    { "id": "aggressive", "label": "Aggressive", "geas": [ {"op":"HUNT","args":{"filter":"enemy","select":"nearest","range":300}}, {"op":"ATTACK","args":{"target":"nearest_enemy"}}, {"op":"RETREAT","args":{"to":"leader","ifHpBelow":20}} ] },
+    { "id": "guard",      "label": "Guard",      "geas": [ {"op":"GUARD","args":{"point":"leader","radius":140}}, {"op":"ATTACK","args":{"target":"nearest_enemy"}} ] },
+    { "id": "gather",     "label": "Gather",     "geas": [ {"op":"GRAB","args":{"filter":"gilt","range":400}}, {"op":"FOLLOW","args":{"target":"leader","range":120}} ] },
+    { "id": "follow",     "label": "Follow",     "geas": [ {"op":"FOLLOW","args":{"target":"leader","range":80}} ] }
+  ],
+
+  "example_pc_farm_geas": {
+    "_desc": "A Bonewright PC farm script: clear floors, loot gilt, heal-retreat, descend — the legal botnet, on theme.",
+    "geas": [
+      { "IF": { "condition": "hp<30%", "then": [ {"op":"RETREAT","args":{"to":"leader","ifHpBelow":30}} ] } },
+      { "IF": { "condition": "enemies>0", "then": [ {"op":"HUNT","args":{"filter":"enemy","select":"nearest"}}, {"op":"USE","args":{"skillSlot":1,"condition":"enemies>2"}}, {"op":"ATTACK","args":{"target":"nearest_enemy"}} ],
+                "else": [ {"op":"GRAB","args":{"filter":"gilt","range":600}}, {"op":"DESCEND","args":{"whenFloorClear":true}} ] } }
+    ]
+  }
+}

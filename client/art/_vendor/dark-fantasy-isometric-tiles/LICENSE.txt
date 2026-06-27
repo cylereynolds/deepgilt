@@ -1,0 +1,12 @@
+Dark Fantasy Isometric Tiles
+Author : Of Far Different Nature (https://fardifferent.carrd.co/)
+Source : https://opengameart.org/content/dark-fantasy-isometric-tiles
+License: Creative Commons Attribution 4.0 International (CC-BY 4.0)
+         https://creativecommons.org/licenses/by/4.0/
+
+REQUIRED ATTRIBUTION (must appear in DeepGilt credits while this art is used):
+  "Dark Fantasy Isometric Tiles" by Of Far Different Nature
+  (https://fardifferent.carrd.co/), licensed CC-BY 4.0.
+
+Downloaded 2026-06-17. Original pack files in this folder are unmodified.
+Recolored interim derivatives live in client/art/env/ (t_*.png). See ../CREDITS.md.

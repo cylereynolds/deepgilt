@@ -1,0 +1,80 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Deepgilt — online</title>
+<style>
+  body { margin: 0; background: #0c0a0f; color: #d8cfc0; font-family: system-ui, sans-serif; }
+  .wrap { max-width: 700px; margin: 0 auto; padding: 16px; }
+  h1 { color: #ffcf5c; font-family: Georgia, serif; font-weight: 700; font-size: 22px; margin: 0 0 2px; }
+  .sub { color: #8a7f70; font-size: 13px; margin: 0 0 12px; }
+  canvas { width: 100%; display: block; border-radius: 8px; border: 1px solid #2a2218; image-rendering: pixelated; cursor: crosshair; background: #0c0a0f; }
+  .hint { font-size: 12px; color: #6e655a; margin-top: 8px; }
+  #err { color: #e88; font-size: 13px; margin-top: 8px; display: none; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Deepgilt — online</h1>
+  <p class="sub">a shared, server-authoritative world. you send moves; the server owns the math. other players &amp; bots share this instance.</p>
+  <canvas id="net"></canvas>
+  <div class="hint">click to move &middot; you auto-attack &middot; the teal-ringed Gilded is you</div>
+  <div id="err"></div>
+</div>
+<script src="sprites.js"></script>
+<script>
+(function () {
+var SERVER = 'http://localhost:8090';
+var MYCLASS = (new URLSearchParams(location.search)).get('class') || 'warden';
+var HUSK = ["....KKK.....","...KrrrK....","..KrRRRrK...","..KrRKKRrK..","..KrRRRRrK..","..KrwwwwrK..","..KrrRRrrK..","..Krr..rrK..","..KrrrrrrK..","..Krr..rrK..","...KK..KK..."];
+var sHusk = DGART.makeSprite(HUSK, {K:'#0a0a0f',r:'#7d1f2b',R:'#b0303a',w:'#d8cfc0'});
+var cv = document.getElementById('net'), ctx = cv.getContext('2d');
+var WW = 640, WH = 360; cv.width = WW; cv.height = WH;
+var state = {players:[], monsters:[], wave:1, tick:0}, myId = null, SC = 2.4;
+
+function api(path, obj){
+  var opt = {method: obj?'POST':'GET'};
+  if (obj){ opt.headers={'Content-Type':'application/json'}; opt.body=JSON.stringify(obj); }
+  return fetch(SERVER+path, opt).then(function(r){return r.json();});
+}
+function showErr(m){ var e=document.getElementById('err'); e.style.display='block'; e.textContent='Server not reachable at '+SERVER+'. Start it: python3 server/server.py 8090  ['+m+']'; }
+
+api('/join', {cls: MYCLASS}).then(function(r){ myId = r.id; }).catch(function(e){ showErr(e.message); });
+setInterval(function(){
+  api('/state').then(function(s){ state = s; }).catch(function(){});
+}, 100);
+
+cv.addEventListener('pointerdown', function(ev){
+  if (myId == null) return;
+  var b = cv.getBoundingClientRect();
+  var x = (ev.clientX-b.left)*(WW/b.width), y = (ev.clientY-b.top)*(WH/b.height);
+  api('/input', {id: myId, tx: x, ty: y}).catch(function(){});
+});
+
+function blit(sp, x, y){ var w=sp.width*SC, h=sp.height*SC; ctx.imageSmoothingEnabled=false; ctx.drawImage(sp,(x-w/2)|0,(y-h/2)|0,w,h); }
+function draw(){
+  ctx.fillStyle='#0c0a0f'; ctx.fillRect(0,0,WW,WH);
+  ctx.strokeStyle='#1b1622'; ctx.lineWidth=1;
+  for (var gx=0; gx<WW; gx+=24){ ctx.beginPath(); ctx.moveTo(gx,0); ctx.lineTo(gx,WH); ctx.stroke(); }
+  for (var gy=0; gy<WH; gy+=24){ ctx.beginPath(); ctx.moveTo(0,gy); ctx.lineTo(WW,gy); ctx.stroke(); }
+  for (var i=0; i<state.monsters.length; i++){ var m=state.monsters[i]; blit(sHusk, m.x, m.y);
+    if (m.hp<m.mhp){ ctx.fillStyle='#3a0a0e'; ctx.fillRect(m.x-12,m.y-22,24,3); ctx.fillStyle='#b0303a'; ctx.fillRect(m.x-12,m.y-22,24*Math.max(0,m.hp/m.mhp),3); } }
+  for (var k=0; k<state.players.length; k++){
+    var p=state.players[k]; if (p.dead) continue;
+    if (p.id===myId){ ctx.strokeStyle='#6fcabf'; ctx.lineWidth=2; ctx.beginPath(); ctx.arc(p.x,p.y+14,16,0,6.28); ctx.stroke(); }
+    blit(DGART.heroSprite(p.cls), p.x, p.y);
+    ctx.fillStyle='#2a0a0e'; ctx.fillRect(p.x-14,p.y-24,28,4); ctx.fillStyle='#7be0a4'; ctx.fillRect(p.x-14,p.y-24,28*Math.max(0,p.hp/p.mhp),4);
+    ctx.fillStyle='#9a8f7e'; ctx.font='10px system-ui'; ctx.textAlign='center'; ctx.fillText(p.cls+(p.id===myId?' (you)':''), p.x, p.y+30);
+  }
+  ctx.textAlign='left'; ctx.fillStyle='#ffcf5c'; ctx.font='700 15px Georgia,serif'; ctx.fillText('Deepgilt online', 12, 22);
+  var me = state.players.filter(function(p){return p.id===myId;})[0];
+  ctx.fillStyle='#d8cfc0'; ctx.font='600 12px system-ui';
+  ctx.fillText('wave '+state.wave+'   players '+state.players.length+'   '+(me?('your gilt '+me.gilt+'   kills '+me.kills):'connecting...'), 150, 21);
+  requestAnimationFrame(draw);
+}
+draw();
+})();
+</script>
+</body>
+</html>

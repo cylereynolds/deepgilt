@@ -1,0 +1,1061 @@
+{
+  "_note": "Affix pools v1. D2 affix model (prefix/suffix, ilvl-gated tiers). 'weight' makes selection non-uniform; 'stat' = engine key. Each TIER carries its own escalating 'name' \u2014 the engine names a drop '<prefix> <base> <suffix>' from the rolled tiers (e.g. 'Merciless Reaping Scythe of the Salamander'). Tier-name ladders adapted from the user's ARPG affix dataset, remapped to Deepgilt's 5 stats (might/finesse/vigor/wit/wyrd) + 6 elements (steel/ember/rime/galv/rot/wither); names that were D&D Product Identity (e.g. 'of the Drow') were dropped; only generic/public-domain flavor kept. Not SRD content \u2014 no attribution required. EXCLUSION: optional 'group' = D2 affix group; two affixes sharing a group never co-roll. When omitted the engine uses 'stat' as the group (so same-stat affixes are mutually exclusive). Optional 'req_alvl' overrides the default required affix-level (= lowest tier ilvl).",
+  "prefixes": [
+    {
+      "id": "edpct",
+      "name": "Honed",
+      "stat": "ed_pct",
+      "group": "weapon_phys",
+      "slots": [
+        "weapon"
+      ],
+      "weight": 10,
+      "tiers": [
+        {
+          "tier": 1,
+          "ilvl": 1,
+          "min": 10,
+          "max": 40,
+          "name": "Honed"
+        },
+        {
+          "tier": 2,
+          "ilvl": 18,
+          "min": 40,
+          "max": 80,
+          "name": "Savage"
+        },
+        {
+          "tier": 3,
+          "ilvl": 40,
+          "min": 80,
+          "max": 150,
+          "name": "Merciless"
+        },
+        {
+          "tier": 4,
+          "ilvl": 66,
+          "min": 150,
+          "max": 230,
+          "name": "Ruthless"
+        }
+      ]
+    },
+    {
+      "id": "flat_steel",
+      "name": "Whetted",
+      "stat": "flat_steel",
+      "group": "weapon_phys",
+      "slots": [
+        "weapon"
+      ],
+      "weight": 9,
+      "tiers": [
+        {
+          "tier": 1,
+          "ilvl": 1,
+          "min": 1,
+          "max": 3,
+          "name": "Whetted"
+        },
+        {
+          "tier": 2,
+          "ilvl": 12,
+          "min": 3,
+          "max": 7,
+          "name": "Barbed"
+        },
+        {
+          "tier": 3,
+          "ilvl": 30,
+          "min": 7,
+          "max": 14,
+          "name": "Cleaving"
+        },
+        {
+          "tier": 4,
+          "ilvl": 55,
+          "min": 14,
+          "max": 24,
+          "name": "Sundering"
+        }
+      ]
+    },
+    {
+      "id": "ember_dmg",
+      "name": "Ember",
+      "stat": "ember_dmg",
+      "slots": [
+        "weapon",
+        "amulet",
+        "ring"
+      ],
+      "weight": 7,
+      "tiers": [
+        {
+          "tier": 1,
+          "ilvl": 4,
+          "min": 3,
+          "max": 9,
+          "name": "Ember"
+        },
+        {
+          "tier": 2,
+          "ilvl": 22,
+          "min": 9,
+          "max": 22,
+          "name": "Smoldering"
+        },
+        {
+          "tier": 3,
+          "ilvl": 45,
+          "min": 22,
+          "max": 45,
+          "name": "Blazing"
+        }
+      ]
+    },
+    {
+      "id": "rime_dmg",
+      "name": "Chilling",
+      "stat": "rime_dmg",
+      "slots": [
+        "weapon",
+        "amulet",
+        "ring"
+      ],
+      "weight": 7,
+      "tiers": [
+        {
+          "tier": 1,
+          "ilvl": 4,
+          "min": 3,
+          "max": 9,
+          "name": "Chilling"
+        },
+        {
+          "tier": 2,
+          "ilvl": 22,
+          "min": 9,
+          "max": 22,
+          "name": "Biting"
+        },
+        {
+          "tier": 3,
+          "ilvl": 45,
+          "min": 22,
+          "max": 45,
+          "name": "Freezing"
+        }
+      ]
+    },
+    {
+      "id": "galv_dmg",
+      "name": "Sparking",
+      "stat": "galv_dmg",
+      "slots": [
+        "weapon",
+        "amulet",
+        "ring"
+      ],
+      "weight": 7,
+      "tiers": [
+        {
+          "tier": 1,
+          "ilvl": 4,
+          "min": 2,
+          "max": 11,
+          "name": "Sparking"
+        },
+        {
+          "tier": 2,
+          "ilvl": 22,
+          "min": 7,
+          "max": 26,
+          "name": "Shocking"
+        },
+        {
+          "tier": 3,
+          "ilvl": 45,
+          "min": 18,
+          "max": 52,
+          "name": "Electrifying"
+        }
+      ]
+    },
+    {
+      "id": "might",
+      "name": "Mighty",
+      "stat": "might",
+      "slots": [
+        "any"
+      ],
+      "weight": 12,
+      "tiers": [
+        {
+          "tier": 1,
+          "ilvl": 1,
+          "min": 3,
+          "max": 8,
+          "name": "Mighty"
+        },
+        {
+          "tier": 2,
+          "ilvl": 20,
+          "min": 8,
+          "max": 15,
+          "name": "Brawny"
+        },
+        {
+          "tier": 3,
+          "ilvl": 44,
+          "min": 15,
+          "max": 25,
+          "name": "Titanic"
+        }
+      ]
+    },
+    {
+      "id": "finesse",
+      "name": "Deft",
+      "stat": "finesse",
+      "slots": [
+        "any"
+      ],
+      "weight": 12,
+      "tiers": [
+        {
+          "tier": 1,
+          "ilvl": 1,
+          "min": 3,
+          "max": 8,
+          "name": "Deft"
+        },
+        {
+          "tier": 2,
+          "ilvl": 20,
+          "min": 8,
+          "max": 15,
+          "name": "Nimble"
+        },
+        {
+          "tier": 3,
+          "ilvl": 44,
+          "min": 15,
+          "max": 25,
+          "name": "Lethal"
+        }
+      ]
+    },
+    {
+      "id": "wyrd",
+      "name": "Eldritch",
+      "stat": "wyrd",
+      "slots": [
+        "any"
+      ],
+      "weight": 8,
+      "tiers": [
+        {
+          "tier": 1,
+          "ilvl": 5,
+          "min": 3,
+          "max": 8,
+          "name": "Eldritch"
+        },
+        {
+          "tier": 2,
+          "ilvl": 25,
+          "min": 8,
+          "max": 15,
+          "name": "Occult"
+        },
+        {
+          "tier": 3,
+          "ilvl": 50,
+          "min": 15,
+          "max": 24,
+          "name": "Unhallowed"
+        }
+      ]
+    },
+    {
+      "id": "armor",
+      "name": "Sturdy",
+      "stat": "armor",
+      "slots": [
+        "body",
+        "helm",
+        "offhand",
+        "belt",
+        "boots",
+        "gloves"
+      ],
+      "weight": 11,
+      "tiers": [
+        {
+          "tier": 1,
+          "ilvl": 1,
+          "min": 10,
+          "max": 40,
+          "name": "Sturdy"
+        },
+        {
+          "tier": 2,
+          "ilvl": 18,
+          "min": 40,
+          "max": 120,
+          "name": "Reinforced"
+        },
+        {
+          "tier": 3,
+          "ilvl": 42,
+          "min": 120,
+          "max": 300,
+          "name": "Hardened"
+        }
+      ]
+    },
+    {
+      "id": "life",
+      "name": "Vital",
+      "stat": "life",
+      "slots": [
+        "any"
+      ],
+      "weight": 13,
+      "tiers": [
+        {
+          "tier": 1,
+          "ilvl": 1,
+          "min": 5,
+          "max": 20,
+          "name": "Vital"
+        },
+        {
+          "tier": 2,
+          "ilvl": 16,
+          "min": 20,
+          "max": 45,
+          "name": "Hardy"
+        },
+        {
+          "tier": 3,
+          "ilvl": 40,
+          "min": 45,
+          "max": 85,
+          "name": "Stalwart"
+        }
+      ]
+    },
+    {
+      "id": "accuracy",
+      "name": "Focused",
+      "stat": "accuracy",
+      "slots": [
+        "weapon",
+        "gloves",
+        "amulet",
+        "ring"
+      ],
+      "weight": 8,
+      "tiers": [
+        {
+          "tier": 1,
+          "ilvl": 1,
+          "min": 5,
+          "max": 15,
+          "name": "Focused"
+        },
+        {
+          "tier": 2,
+          "ilvl": 22,
+          "min": 15,
+          "max": 30,
+          "name": "Precise"
+        },
+        {
+          "tier": 3,
+          "ilvl": 46,
+          "min": 30,
+          "max": 50,
+          "name": "Unerring"
+        }
+      ]
+    },
+    {
+      "id": "ironclad",
+      "name": "Ironclad",
+      "stat": "armor_pct",
+      "slots": [
+        "body",
+        "helm",
+        "offhand",
+        "belt",
+        "boots"
+      ],
+      "weight": 6,
+      "tiers": [
+        {
+          "tier": 1,
+          "ilvl": 5,
+          "min": 8,
+          "max": 15,
+          "name": "Ironclad"
+        },
+        {
+          "tier": 2,
+          "ilvl": 28,
+          "min": 15,
+          "max": 25,
+          "name": "Adamant"
+        },
+        {
+          "tier": 3,
+          "ilvl": 52,
+          "min": 25,
+          "max": 40,
+          "name": "Impervious"
+        }
+      ]
+    },
+    {
+      "id": "shielded",
+      "name": "Shielded",
+      "stat": "dr",
+      "slots": [
+        "body",
+        "helm",
+        "belt",
+        "offhand"
+      ],
+      "weight": 5,
+      "tiers": [
+        {
+          "tier": 1,
+          "ilvl": 8,
+          "min": 1,
+          "max": 3,
+          "name": "Shielded"
+        },
+        {
+          "tier": 2,
+          "ilvl": 32,
+          "min": 3,
+          "max": 6,
+          "name": "Guarded"
+        },
+        {
+          "tier": 3,
+          "ilvl": 58,
+          "min": 6,
+          "max": 10,
+          "name": "Bulwark"
+        }
+      ]
+    }
+  ],
+  "suffixes": [
+    {
+      "id": "of_vigor",
+      "name": "of Vigor",
+      "stat": "vigor",
+      "slots": [
+        "any"
+      ],
+      "weight": 12,
+      "tiers": [
+        {
+          "tier": 1,
+          "ilvl": 1,
+          "min": 3,
+          "max": 8,
+          "name": "of Vigor"
+        },
+        {
+          "tier": 2,
+          "ilvl": 20,
+          "min": 8,
+          "max": 15,
+          "name": "of Fortitude"
+        },
+        {
+          "tier": 3,
+          "ilvl": 44,
+          "min": 15,
+          "max": 25,
+          "name": "of the Golem"
+        }
+      ]
+    },
+    {
+      "id": "of_intellect",
+      "name": "of the Scholar",
+      "stat": "wit",
+      "slots": [
+        "any"
+      ],
+      "weight": 10,
+      "tiers": [
+        {
+          "tier": 1,
+          "ilvl": 1,
+          "min": 3,
+          "max": 8,
+          "name": "of the Scholar"
+        },
+        {
+          "tier": 2,
+          "ilvl": 20,
+          "min": 8,
+          "max": 15,
+          "name": "of the Mage"
+        },
+        {
+          "tier": 3,
+          "ilvl": 44,
+          "min": 15,
+          "max": 25,
+          "name": "of the Archmage"
+        }
+      ]
+    },
+    {
+      "id": "of_warding",
+      "name": "of Warding",
+      "stat": "res_all",
+      "slots": [
+        "any"
+      ],
+      "weight": 7,
+      "tiers": [
+        {
+          "tier": 1,
+          "ilvl": 3,
+          "min": 5,
+          "max": 12,
+          "name": "of Warding"
+        },
+        {
+          "tier": 2,
+          "ilvl": 24,
+          "min": 12,
+          "max": 20,
+          "name": "of the Bastion"
+        },
+        {
+          "tier": 3,
+          "ilvl": 48,
+          "min": 20,
+          "max": 30,
+          "name": "of the Aegis"
+        }
+      ]
+    },
+    {
+      "id": "of_embers",
+      "name": "of Embers",
+      "stat": "res_ember",
+      "slots": [
+        "any"
+      ],
+      "weight": 9,
+      "tiers": [
+        {
+          "tier": 1,
+          "ilvl": 1,
+          "min": 8,
+          "max": 20,
+          "name": "of Embers"
+        },
+        {
+          "tier": 2,
+          "ilvl": 22,
+          "min": 20,
+          "max": 35,
+          "name": "of Cinders"
+        },
+        {
+          "tier": 3,
+          "ilvl": 46,
+          "min": 35,
+          "max": 50,
+          "name": "of the Salamander"
+        }
+      ]
+    },
+    {
+      "id": "of_frost",
+      "name": "of Frost",
+      "stat": "res_rime",
+      "slots": [
+        "any"
+      ],
+      "weight": 9,
+      "tiers": [
+        {
+          "tier": 1,
+          "ilvl": 1,
+          "min": 8,
+          "max": 20,
+          "name": "of Frost"
+        },
+        {
+          "tier": 2,
+          "ilvl": 22,
+          "min": 20,
+          "max": 35,
+          "name": "of Rime"
+        },
+        {
+          "tier": 3,
+          "ilvl": 46,
+          "min": 35,
+          "max": 50,
+          "name": "of the Glacier"
+        }
+      ]
+    },
+    {
+      "id": "of_grounding",
+      "name": "of Grounding",
+      "stat": "res_galv",
+      "slots": [
+        "any"
+      ],
+      "weight": 9,
+      "tiers": [
+        {
+          "tier": 1,
+          "ilvl": 1,
+          "min": 8,
+          "max": 20,
+          "name": "of Grounding"
+        },
+        {
+          "tier": 2,
+          "ilvl": 22,
+          "min": 20,
+          "max": 35,
+          "name": "of Insulation"
+        },
+        {
+          "tier": 3,
+          "ilvl": 46,
+          "min": 35,
+          "max": 50,
+          "name": "of the Storm"
+        }
+      ]
+    },
+    {
+      "id": "of_cleansing",
+      "name": "of Cleansing",
+      "stat": "res_rot",
+      "slots": [
+        "any"
+      ],
+      "weight": 9,
+      "tiers": [
+        {
+          "tier": 1,
+          "ilvl": 1,
+          "min": 8,
+          "max": 20,
+          "name": "of Cleansing"
+        },
+        {
+          "tier": 2,
+          "ilvl": 22,
+          "min": 20,
+          "max": 35,
+          "name": "of the Antidote"
+        },
+        {
+          "tier": 3,
+          "ilvl": 46,
+          "min": 35,
+          "max": 50,
+          "name": "of the Basilisk"
+        }
+      ]
+    },
+    {
+      "id": "of_alacrity",
+      "name": "of Readiness",
+      "stat": "attack_speed",
+      "slots": [
+        "weapon",
+        "gloves"
+      ],
+      "weight": 6,
+      "tiers": [
+        {
+          "tier": 1,
+          "ilvl": 10,
+          "min": 5,
+          "max": 10,
+          "name": "of Readiness"
+        },
+        {
+          "tier": 2,
+          "ilvl": 30,
+          "min": 10,
+          "max": 20,
+          "name": "of Alacrity"
+        },
+        {
+          "tier": 3,
+          "ilvl": 55,
+          "min": 20,
+          "max": 30,
+          "name": "of Swiftness"
+        }
+      ]
+    },
+    {
+      "id": "of_precision",
+      "name": "of Precision",
+      "stat": "crit",
+      "slots": [
+        "weapon",
+        "gloves",
+        "amulet",
+        "ring"
+      ],
+      "weight": 6,
+      "tiers": [
+        {
+          "tier": 1,
+          "ilvl": 8,
+          "min": 2,
+          "max": 5,
+          "name": "of Precision"
+        },
+        {
+          "tier": 2,
+          "ilvl": 28,
+          "min": 5,
+          "max": 9,
+          "name": "of Keenness"
+        },
+        {
+          "tier": 3,
+          "ilvl": 52,
+          "min": 9,
+          "max": 14,
+          "name": "of Wounding"
+        }
+      ]
+    },
+    {
+      "id": "of_leeching",
+      "name": "of Siphoning",
+      "stat": "leech",
+      "slots": [
+        "weapon",
+        "ring",
+        "amulet"
+      ],
+      "weight": 5,
+      "tiers": [
+        {
+          "tier": 1,
+          "ilvl": 12,
+          "min": 2,
+          "max": 4,
+          "name": "of Siphoning"
+        },
+        {
+          "tier": 2,
+          "ilvl": 34,
+          "min": 4,
+          "max": 7,
+          "name": "of the Vampire"
+        }
+      ]
+    },
+    {
+      "id": "of_giltsight",
+      "name": "of Finding",
+      "stat": "gilt_sight",
+      "slots": [
+        "helm",
+        "amulet",
+        "ring",
+        "gloves",
+        "boots"
+      ],
+      "weight": 6,
+      "tiers": [
+        {
+          "tier": 1,
+          "ilvl": 6,
+          "min": 8,
+          "max": 20,
+          "name": "of Finding"
+        },
+        {
+          "tier": 2,
+          "ilvl": 26,
+          "min": 20,
+          "max": 40,
+          "name": "of Fortune"
+        },
+        {
+          "tier": 3,
+          "ilvl": 50,
+          "min": 40,
+          "max": 70,
+          "name": "of Prosperity"
+        }
+      ]
+    },
+    {
+      "id": "of_binding",
+      "name": "of Binding",
+      "stat": "bind_capacity",
+      "slots": [
+        "amulet",
+        "body",
+        "helm"
+      ],
+      "weight": 2,
+      "tiers": [
+        {
+          "tier": 1,
+          "ilvl": 30,
+          "min": 1,
+          "max": 1,
+          "name": "of Binding"
+        },
+        {
+          "tier": 2,
+          "ilvl": 60,
+          "min": 1,
+          "max": 2,
+          "name": "of the Geas"
+        }
+      ]
+    },
+    {
+      "id": "of_mastery",
+      "name": "of Mastery",
+      "stat": "plus_skills",
+      "slots": [
+        "amulet",
+        "weapon",
+        "offhand"
+      ],
+      "weight": 2,
+      "tiers": [
+        {
+          "tier": 1,
+          "ilvl": 40,
+          "min": 1,
+          "max": 1,
+          "name": "of Mastery"
+        },
+        {
+          "tier": 2,
+          "ilvl": 70,
+          "min": 1,
+          "max": 2,
+          "name": "of the Adept"
+        }
+      ]
+    },
+    {
+      "id": "of_insight",
+      "name": "of the Seer",
+      "stat": "wyrd",
+      "slots": [
+        "any"
+      ],
+      "weight": 8,
+      "tiers": [
+        {
+          "tier": 1,
+          "ilvl": 5,
+          "min": 3,
+          "max": 8,
+          "name": "of the Seer"
+        },
+        {
+          "tier": 2,
+          "ilvl": 25,
+          "min": 8,
+          "max": 15,
+          "name": "of the Sage"
+        },
+        {
+          "tier": 3,
+          "ilvl": 50,
+          "min": 15,
+          "max": 24,
+          "name": "of the Oracle"
+        }
+      ]
+    },
+    {
+      "id": "of_striding",
+      "name": "of Striding",
+      "stat": "move_speed",
+      "slots": [
+        "boots",
+        "belt"
+      ],
+      "weight": 5,
+      "tiers": [
+        {
+          "tier": 1,
+          "ilvl": 6,
+          "min": 6,
+          "max": 12,
+          "name": "of Pacing"
+        },
+        {
+          "tier": 2,
+          "ilvl": 30,
+          "min": 12,
+          "max": 20,
+          "name": "of Striding"
+        },
+        {
+          "tier": 3,
+          "ilvl": 55,
+          "min": 20,
+          "max": 30,
+          "name": "of the Runner"
+        }
+      ]
+    },
+    {
+      "id": "of_channeling",
+      "name": "of Channeling",
+      "stat": "cast_speed",
+      "slots": [
+        "weapon",
+        "amulet",
+        "ring",
+        "helm"
+      ],
+      "weight": 5,
+      "tiers": [
+        {
+          "tier": 1,
+          "ilvl": 10,
+          "min": 8,
+          "max": 15,
+          "name": "of Casting"
+        },
+        {
+          "tier": 2,
+          "ilvl": 34,
+          "min": 15,
+          "max": 25,
+          "name": "of Channeling"
+        },
+        {
+          "tier": 3,
+          "ilvl": 58,
+          "min": 25,
+          "max": 40,
+          "name": "of Conjuration"
+        }
+      ]
+    },
+    {
+      "id": "crush",
+      "name": "Crushing",
+      "stat": "crush",
+      "slots": [
+        "weapon",
+        "gloves"
+      ],
+      "weight": 6,
+      "tiers": [
+        {
+          "tier": 1,
+          "ilvl": 1,
+          "min": 5,
+          "max": 5,
+          "name": "of Denting"
+        },
+        {
+          "tier": 2,
+          "ilvl": 20,
+          "min": 10,
+          "max": 10,
+          "name": "of Smashing"
+        },
+        {
+          "tier": 3,
+          "ilvl": 44,
+          "min": 15,
+          "max": 15,
+          "name": "of the Juggernaut"
+        }
+      ]
+    },
+    {
+      "id": "deadly",
+      "name": "Deadly",
+      "stat": "deadly",
+      "slots": [
+        "weapon",
+        "amulet"
+      ],
+      "weight": 6,
+      "tiers": [
+        {
+          "tier": 1,
+          "ilvl": 1,
+          "min": 5,
+          "max": 5,
+          "name": "of Tearing"
+        },
+        {
+          "tier": 2,
+          "ilvl": 20,
+          "min": 10,
+          "max": 10,
+          "name": "of Gouging"
+        },
+        {
+          "tier": 3,
+          "ilvl": 44,
+          "min": 15,
+          "max": 15,
+          "name": "of Slaughter"
+        }
+      ]
+    },
+    {
+      "id": "wounds",
+      "name": "Rending",
+      "stat": "wounds",
+      "slots": [
+        "weapon",
+        "gloves"
+      ],
+      "weight": 6,
+      "tiers": [
+        {
+          "tier": 1,
+          "ilvl": 1,
+          "min": 10,
+          "max": 10,
+          "name": "of Piercing"
+        },
+        {
+          "tier": 2,
+          "ilvl": 24,
+          "min": 20,
+          "max": 20,
+          "name": "of Laceration"
+        }
+      ]
+    }
+  ]
+}

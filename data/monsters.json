@@ -1,0 +1,47 @@
+{
+  "_note": "Bestiary v0. Mechanics = D2 monster model (families, champion/rare mods, act bosses); all names/flavor original. Stats first-pass; engine/monsters.py scales them by depth.",
+  "_srd": {
+    "source": "System Reference Document 5.1, © Wizards of the Coast LLC",
+    "license": "CC-BY-4.0 — https://creativecommons.org/licenses/by/4.0/legalcode",
+    "retrieved": "Open5e API (document slug 'wotc-srd'), 2026-06-15",
+    "note": "Entries carrying an inline _srd object are DERIVED FROM (and modified versions of) SRD 5.1 stat blocks. Generic undead only — no D&D Product Identity. Transform SRD->Deepgilt: level = CR mapped to our depth band; hp = round(SRD_hp * 2.5) (tabletop HP is low for ARPG swarms); dmg = SRD melee average; physical -> 'steel'; armor = max(0, round((AC-9)*6)); SRD poison resistance -> rot 50, poison immunity -> rot 100. LIMITATION: our combat has a single physical channel ('steel', mitigated by armor not resist), so SRD physical vulnerabilities/resistances (e.g. skeleton 'vulnerable to bludgeoning') can't be expressed except by lowering armor.",
+    "attribution_file": "../ATTRIBUTION.md"
+  },
+  "families": [
+    { "id": "husk", "name": "Husks", "blurb": "reanimated dead" },
+    { "id": "beast", "name": "Beasts", "blurb": "corrupted wildlife" },
+    { "id": "construct", "name": "Constructs", "blurb": "old gilt-machines" },
+    { "id": "drowned", "name": "the Drowned", "blurb": "flooded-vault things" },
+    { "id": "cultist", "name": "Cultists", "blurb": "Beating-Heart faithful" },
+    { "id": "warped", "name": "the Warped", "blurb": "elites and bosses" }
+  ],
+  "monster_affixes": [
+    { "id": "fleet", "name": "Fleet", "effect": "extra movement and attack speed" },
+    { "id": "wretched", "name": "Wretched", "effect": "curses you on hit (-resist)" },
+    { "id": "ember_touched", "name": "Ember-touched", "effect": "adds Ember damage and a death-burst" },
+    { "id": "manybound", "name": "Manybound", "effect": "raises lesser husks" },
+    { "id": "leeching", "name": "Leeching", "effect": "heals from damage dealt" },
+    { "id": "giltskin", "name": "Giltskin", "effect": "+armor and physical reduction" },
+    { "id": "galv_charged", "name": "Galv-charged", "effect": "adds Galv and chain-shocks" }
+  ],
+  "monsters": [
+    { "id": "husk", "name": "Gilt Husk", "family": "husk", "level": 2, "hp": 34, "dmg": 6, "dmg_type": "steel", "armor": 12, "resist": {} },
+    { "id": "slinger", "name": "Bound Slinger", "family": "husk", "level": 4, "hp": 28, "dmg": 8, "dmg_type": "steel", "armor": 8, "resist": {} },
+    { "id": "rattlebound", "name": "Rattle-Bound", "family": "husk", "level": 2, "hp": 33, "dmg": 5, "dmg_type": "steel", "armor": 24, "resist": { "rot": 50 }, "_srd": { "from": "Skeleton", "cr": "1/4", "ac": 13, "srd_hp": 13, "attack": "Shortsword 1d6+2 (avg 5)", "traits": "resist poison; vulnerable bludgeoning; immune poisoned/exhaustion" } },
+    { "id": "sodden_husk", "name": "Sodden Husk", "family": "husk", "level": 2, "hp": 55, "dmg": 4, "dmg_type": "steel", "armor": 0, "resist": {}, "_srd": { "from": "Zombie", "cr": "1/4", "ac": 8, "srd_hp": 22, "attack": "Slam 1d6+1 (avg 4)", "traits": "immune poisoned (condition only)" } },
+    { "id": "gravegaunt", "name": "Gravegaunt", "family": "husk", "level": 5, "hp": 55, "dmg": 7, "dmg_type": "steel", "armor": 18, "resist": { "rot": 100 }, "_srd": { "from": "Ghoul", "cr": "1", "ac": 12, "srd_hp": 22, "attack": "Claws 2d4+2 (avg 7)", "traits": "immune poison; immune charmed/exhaustion/poisoned" } },
+    { "id": "gilt_hound", "name": "Gilt Hound", "family": "beast", "level": 5, "hp": 40, "dmg": 9, "dmg_type": "steel", "armor": 10, "resist": { "rot": 20 } },
+    { "id": "lapsed_warden", "name": "Lapsed Warden", "family": "construct", "level": 9, "hp": 90, "dmg": 12, "dmg_type": "steel", "armor": 60, "resist": { "steel": 40, "galv": -20 } },
+    { "id": "drowned_thrall", "name": "Drowned Thrall", "family": "drowned", "level": 12, "hp": 70, "dmg": 14, "dmg_type": "rime", "armor": 20, "resist": { "rime": 50, "ember": -20 } },
+    { "id": "coin_acolyte", "name": "Coin Acolyte", "family": "cultist", "level": 15, "hp": 80, "dmg": 16, "dmg_type": "wither", "armor": 18, "resist": { "wither": 25 } },
+    { "id": "ember_cultist", "name": "Ember Cultist", "family": "cultist", "level": 16, "hp": 85, "dmg": 18, "dmg_type": "ember", "armor": 18, "resist": { "ember": 60 } },
+    { "id": "wild_golem", "name": "Wild Gilt-Golem", "family": "construct", "level": 20, "hp": 220, "dmg": 24, "dmg_type": "steel", "armor": 120, "resist": { "steel": 50 } }
+  ],
+  "bosses": [
+    { "id": "overseer", "name": "the Overseer", "act": 1, "level": 12, "hp": 1400, "dmg": 22, "armor": 40, "resist": { "steel": 20 }, "mechanic": "summons husk laborers; hoards the lip's gilt" },
+    { "id": "sump_mother", "name": "the Sump-Mother", "act": 2, "level": 24, "hp": 3200, "dmg": 34, "armor": 30, "resist": { "rime": 50, "rot": 40 }, "mechanic": "floods the arena and spawns the Drowned" },
+    { "id": "coinflayer", "name": "the Coinflayer", "act": 3, "level": 36, "hp": 6000, "dmg": 48, "armor": 50, "resist": { "wither": 40, "ember": 40 }, "mechanic": "taxes your gilt to heal itself; gold-mad priest" },
+    { "id": "choirmaster", "name": "the Choirmaster of the Beat", "act": 4, "level": 48, "hp": 11000, "dmg": 66, "armor": 60, "resist": { "wither": 60 }, "mechanic": "the heart's pulse enrages it on the beat" },
+    { "id": "first_bound", "name": "the First Bound", "act": 5, "level": 60, "hp": 24000, "dmg": 90, "armor": 80, "resist": { "steel": 40, "ember": 40, "rime": 40, "galv": 40, "rot": 40, "wither": 50 }, "mechanic": "the Wright's first creation; binds YOUR slain servants against you" }
+  ]
+}

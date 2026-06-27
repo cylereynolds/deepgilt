@@ -1,0 +1,27 @@
+{
+  "_note": "Warden skills v0 — cloned from the Bonewright schema. Numbers first-pass.",
+  "class": "warden", "primary_attr": "might", "resource": "charge",
+  "trees": {
+    "Oaths": [
+      { "id": "aura_lawful", "name": "Aura of the Lawful", "tier": 1, "prereq": [], "synergies": [], "toggle": true, "desc": "Party + servants gain resistances.", "scaling": { "stat": "res_all", "base": 8, "per_rank": 2 } },
+      { "id": "bulwark", "name": "Bulwark", "tier": 6, "prereq": ["aura_lawful"], "synergies": [], "toggle": true, "desc": "Party gains armor.", "scaling": { "stat": "armor", "base": 25, "per_rank": 12 } },
+      { "id": "wrathlight", "name": "Wrathlight", "tier": 12, "prereq": ["aura_lawful"], "synergies": [], "toggle": true, "desc": "Party deals bonus Wither.", "scaling": { "stat": "wither_dmg", "base": 6, "per_rank": 3 } },
+      { "id": "zeal_order", "name": "Zeal of Order", "tier": 24, "prereq": ["wrathlight"], "synergies": [], "toggle": true, "desc": "Party gains attack and cast speed.", "scaling": { "stat": "speed_pct", "base": 10, "per_rank": 3 } },
+      { "id": "edict", "name": "Edict", "tier": 30, "prereq": ["zeal_order"], "synergies": ["aura_lawful"], "toggle": true, "desc": "Capstone aura: all of the above, lesser.", "scaling": { "stat": "all_pct", "base": 8, "per_rank": 2 } }
+    ],
+    "Judgment": [
+      { "id": "verdict", "name": "Verdict", "tier": 1, "prereq": [], "synergies": ["tribunal"], "charge": 6, "desc": "Smiting strike; cannot miss.", "scaling": { "stat": "wither_dmg", "base": 10, "per_rank": 5 } },
+      { "id": "sear", "name": "Sear", "tier": 6, "prereq": ["verdict"], "synergies": [], "charge": 8, "desc": "Holy ember burst on hit.", "scaling": { "stat": "ember_dmg", "base": 12, "per_rank": 5 } },
+      { "id": "censure", "name": "Censure", "tier": 18, "prereq": ["verdict"], "synergies": [], "charge": 12, "desc": "Stuns and damages (Vigor save).", "scaling": { "stat": "wither_dmg", "base": 18, "per_rank": 7 } },
+      { "id": "reckoner", "name": "Reckoner", "tier": 24, "prereq": ["censure"], "synergies": [], "passive": true, "desc": "Judgments build holy charge.", "scaling": { "stat": "dmg_pct", "base": 10, "per_rank": 4 } },
+      { "id": "tribunal", "name": "Tribunal", "tier": 30, "prereq": ["reckoner"], "synergies": ["verdict"], "charge": 28, "desc": "Capstone field of judgment.", "scaling": { "stat": "wither_dmg", "base": 40, "per_rank": 12 } }
+    ],
+    "Wards": [
+      { "id": "mend", "name": "Mend", "tier": 1, "prereq": [], "synergies": ["sanctum"], "charge": 8, "desc": "Heal self, party, and servants.", "scaling": { "stat": "heal", "base": 20, "per_rank": 10 } },
+      { "id": "aegis", "name": "Aegis", "tier": 6, "prereq": ["mend"], "synergies": [], "charge": 12, "cooldown": 8, "desc": "Absorb shield on an ally.", "scaling": { "stat": "absorb", "base": 30, "per_rank": 14 } },
+      { "id": "lay_on", "name": "Lay On", "tier": 12, "prereq": ["mend"], "synergies": ["mend"], "charge": 16, "cooldown": 10, "desc": "Large single-target heal.", "scaling": { "stat": "heal", "base": 60, "per_rank": 25 } },
+      { "id": "hold", "name": "Hold", "tier": 18, "prereq": ["aegis"], "synergies": [], "charge": 18, "desc": "A warded zone of safety.", "scaling": { "stat": "absorb", "base": 25, "per_rank": 10 } },
+      { "id": "sanctum", "name": "Sanctum", "tier": 30, "prereq": ["hold"], "synergies": ["mend"], "charge": 30, "cooldown": 20, "desc": "Capstone: brief party invulnerability.", "scaling": { "stat": "duration", "base": 1.5, "per_rank": 0.2 } }
+    ]
+  }
+}

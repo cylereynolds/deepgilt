@@ -1,0 +1,75 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Deepgilt — Encampment Asset Gallery</title>
+<style>
+  :root { color-scheme: dark; }
+  body { margin:0; background:#0f0d0b; color:#e6dcc6; font:15px/1.5 system-ui,Segoe UI,Roboto,sans-serif; }
+  header { padding:22px 26px 8px; }
+  h1 { margin:0; font-size:22px; font-weight:600; color:#f0e6cf; }
+  .sub { color:#8f8674; font-size:12.5px; margin-top:4px; }
+  h2 { margin:30px 26px 6px; font-size:14px; font-weight:600; letter-spacing:.5px; color:#c7b78f; text-transform:uppercase; border-top:1px solid #2c2820; padding-top:18px; }
+  .grid { display:grid; gap:16px; padding:14px 26px 4px;
+          grid-template-columns:repeat(auto-fill,minmax(240px,1fr)); }
+  figure { margin:0; background:#17140f; border:1px solid #2c2820; border-radius:10px; overflow:hidden; }
+  figure img { display:block; width:100%; height:auto; background:#0a0908; }
+  /* checker behind keyable props so transparency / chroma is obvious */
+  figure.chroma img { background:
+      conic-gradient(#262019 25%, #1b1712 0 50%, #262019 0 75%, #1b1712 0) 0 0/22px 22px; }
+  figcaption { padding:8px 11px; font-size:12.5px; }
+  figcaption b { color:#f0e6cf; }
+  figcaption span { color:#8f8674; display:block; font-size:11px; margin-top:2px; }
+  footer { color:#6f685a; font-size:11.5px; padding:24px 26px 40px; }
+</style>
+</head>
+<body>
+<header>
+  <h1>The Gilded Hold — Encampment Asset Set</h1>
+  <div class="sub">Generated via Leonardo (Lucid Origin) from the 56×40 blueprint · served live from <code>client/</code></div>
+</header>
+
+<h2>Scene concepts</h2>
+<div class="grid" id="scene"></div>
+
+<h2>Ground tiles <span style="font-weight:400;text-transform:none;color:#6f685a">— top-down, flat-lit, tileable (art/env)</span></h2>
+<div class="grid" id="env"></div>
+
+<h2>Props <span style="font-weight:400;text-transform:none;color:#6f685a">— raw on chroma background, pre-cutout (art/prop)</span></h2>
+<div class="grid" id="prop"></div>
+
+<footer>These are source files, not yet wired into the renderer. Reload after generating more — the server sends no-cache headers.</footer>
+
+<script>
+  function add(sel, items){
+    var g = document.getElementById(sel);
+    items.forEach(function(it){
+      var f = document.createElement('figure'); if(it.chroma) f.className='chroma';
+      f.innerHTML = '<img loading="lazy" src="'+it.src+'" alt="'+it.t+'"><figcaption><b>'+it.t+'</b><span>'+it.s+'</span></figcaption>';
+      g.appendChild(f);
+    });
+  }
+  add('scene', [
+    {t:'Battle map (Prompt A)', s:'art/scene/map_overview.png', src:'art/scene/map_overview.png'},
+    {t:'Bonfire → NW → Forge (B)', s:'art/scene/view_forge.png', src:'art/scene/view_forge.png'},
+    {t:'Rune → SW → Wagons (C)', s:'art/scene/view_wagons.png', src:'art/scene/view_wagons.png'},
+  ]);
+  add('env', [
+    {t:'TILE_MUD', s:'env/mud.png', src:'art/env/mud.png'},
+    {t:'TILE_ASH', s:'env/ash.png', src:'art/env/ash.png'},
+    {t:'TILE_GRASS', s:'env/grass.png', src:'art/env/grass.png'},
+    {t:'TILE_STONE', s:'env/stone.png', src:'art/env/stone.png'},
+    {t:'TILE_RIVER', s:'env/river.png', src:'art/env/river.png'},
+  ]);
+  add('prop', [
+    {t:'Rune slab', s:'magenta key', src:'art/prop/rune_slab.png', chroma:true},
+    {t:'Forge', s:'magenta key', src:'art/prop/forge.png', chroma:true},
+    {t:'Mystic tent', s:'green key', src:'art/prop/tent.png', chroma:true},
+    {t:'Caravan wagon', s:'magenta key', src:'art/prop/wagon.png', chroma:true},
+    {t:'Campfire', s:'magenta key', src:'art/prop/campfire.png', chroma:true},
+    {t:'Sentry', s:'green key', src:'art/prop/sentry.png', chroma:true},
+  ]);
+</script>
+</body>
+</html>

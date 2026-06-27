@@ -1,0 +1,27 @@
+{
+  "_note": "Pyre skills v0 — cloned from the Bonewright schema. Numbers first-pass. Skills with an _srd block derive their scaling from an SRD 5.1 spell (CC-BY-4.0, © Wizards of the Coast; modified). See ../../ATTRIBUTION.md.",
+  "class": "pyre", "primary_attr": "wit", "resource": "charge",
+  "trees": {
+    "Ember": [
+      { "id": "cinderbolt", "name": "Cinderbolt", "tier": 1, "prereq": [], "synergies": ["conflagrate"], "charge": 4, "desc": "Bolt of ember-gilt.", "scaling": { "stat": "ember_dmg", "base": 6, "per_rank": 5 }, "_srd": { "from": "Fire Bolt", "dice": "1d10 fire, +1d10 at char levels 5/11/17", "map": "base 6 = avg(1d10); per_rank 5 = the +1d10 tier step; SRD 'fire' -> Deepgilt 'ember'", "source": "SRD 5.1, © Wizards of the Coast LLC, CC-BY-4.0 (modified)" } },
+      { "id": "ember_mastery", "name": "Ember Mastery", "tier": 6, "prereq": ["cinderbolt"], "synergies": [], "passive": true, "desc": "+Ember damage and -Ember pierce.", "scaling": { "stat": "ember_pct", "base": 12, "per_rank": 6 } },
+      { "id": "pyre_nova", "name": "Pyre Nova", "tier": 12, "prereq": ["cinderbolt"], "synergies": ["cinderbolt"], "charge": 14, "desc": "Ring of fire around you.", "scaling": { "stat": "ember_dmg", "base": 16, "per_rank": 7 } },
+      { "id": "conflagrate", "name": "Conflagrate", "tier": 18, "prereq": ["cinderbolt"], "synergies": ["pyre_nova"], "charge": 16, "desc": "Lingering burn that spreads.", "scaling": { "stat": "ember_dmg", "base": 12, "per_rank": 6 } },
+      { "id": "ashstorm", "name": "Ashstorm", "tier": 30, "prereq": ["conflagrate"], "synergies": ["cinderbolt", "pyre_nova"], "charge": 35, "cooldown": 6, "desc": "Capstone rain of ash.", "scaling": { "stat": "ember_dmg", "base": 50, "per_rank": 14 } }
+    ],
+    "Rime": [
+      { "id": "frostlance", "name": "Frostlance", "tier": 1, "prereq": [], "synergies": ["shatter"], "charge": 5, "desc": "Piercing rime spear; chills.", "scaling": { "stat": "rime_dmg", "base": 7, "per_rank": 4 } },
+      { "id": "rimefield", "name": "Rimefield", "tier": 6, "prereq": ["frostlance"], "synergies": [], "charge": 12, "desc": "Slowing field of cold.", "scaling": { "stat": "slow_pct", "base": 20, "per_rank": 4 } },
+      { "id": "rime_mastery", "name": "Rime Mastery", "tier": 12, "prereq": ["frostlance"], "synergies": [], "passive": true, "desc": "+Rime damage and chill duration.", "scaling": { "stat": "rime_pct", "base": 12, "per_rank": 6 } },
+      { "id": "shatter", "name": "Shatter", "tier": 18, "prereq": ["frostlance"], "synergies": ["frostlance"], "charge": 16, "desc": "Detonate frozen foes (Wyrd save).", "scaling": { "stat": "rime_dmg", "base": 24, "per_rank": 10 } },
+      { "id": "hailwall", "name": "Hailwall", "tier": 24, "prereq": ["rimefield"], "synergies": [], "charge": 20, "desc": "Barrier of hail that blocks and chills.", "scaling": { "stat": "rime_dmg", "base": 18, "per_rank": 8 } }
+    ],
+    "Galv": [
+      { "id": "arcjump", "name": "Arcjump", "tier": 1, "prereq": [], "synergies": ["chainfork"], "charge": 5, "desc": "Galv arc that leaps between foes.", "scaling": { "stat": "galv_dmg", "base": 4, "per_rank": 6 } },
+      { "id": "overcharge", "name": "Overcharge", "tier": 6, "prereq": ["arcjump"], "synergies": [], "passive": true, "desc": "+Galv damage, builds a charge stack.", "scaling": { "stat": "galv_pct", "base": 12, "per_rank": 6 } },
+      { "id": "stormcall", "name": "Stormcall", "tier": 12, "prereq": ["arcjump"], "synergies": ["arcjump"], "charge": 14, "desc": "Call strikes from above.", "scaling": { "stat": "galv_dmg", "base": 14, "per_rank": 8 } },
+      { "id": "chainfork", "name": "Chainfork", "tier": 18, "prereq": ["arcjump"], "synergies": ["stormcall"], "charge": 16, "desc": "Forking chain that multiplies.", "scaling": { "stat": "galv_dmg", "base": 18, "per_rank": 8 } },
+      { "id": "tempest", "name": "Tempest", "tier": 30, "prereq": ["chainfork"], "synergies": ["arcjump", "stormcall"], "charge": 35, "cooldown": 5, "desc": "Capstone galv tempest.", "scaling": { "stat": "galv_dmg", "base": 30, "per_rank": 18 } }
+    ]
+  }
+}
