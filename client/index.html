@@ -382,8 +382,9 @@ var lopBrazier=null,lopServant=null,lopGold=null;
 if(ART_LOP){lopBrazier={fr:[],nfr:8,FEET:0.842};for(var _bf=0;_bf<8;_bf++){var _bim=new Image();_bim.src=encodeURI('art/lop_cropped/brazier_lit/SE/brazier_lit_SE_315.0_'+_bf+'.png');lopBrazier.fr.push(_bim);}
   lopServant={fr:[],nfr:8,FEET:0.692};for(var _sf=0;_sf<8;_sf++){var _sim=new Image();_sim.src=encodeURI('art/lop_cropped/subservient/subservient_special_working/SE/subservient_special_working_SE_315.0_'+_sf+'.png');lopServant.fr.push(_sim);}   // Bezel NPC
   lopGold={fr:[],nfr:8,FEET:0.702};for(var _gf=0;_gf<8;_gf++){var _gim=new Image();_gim.src=encodeURI('art/lop_cropped/gold_drop/SE/gold_drop_SE_315.0_'+_gf+'.png');lopGold.fr.push(_gim);}}   // coin drops
-var lopTorch=null;
-if(ART_LOP){var _tim=new Image();_tim.src=encodeURI('art/lop_cropped/torch/SE/torch_SE_315.0_0.png');lopTorch={im:_tim,FEET:0.676};}   // wall torch
+var lopTorch=null,lopGem=null;
+if(ART_LOP){var _tim=new Image();_tim.src=encodeURI('art/lop_cropped/torch/SE/torch_SE_315.0_0.png');lopTorch={im:_tim,FEET:0.676};   // wall torch
+  lopGem={fr:[],nfr:8,FEET:0.649};for(var _gmf=0;_gmf<8;_gmf++){var _gmi=new Image();_gmi.src=encodeURI('art/lop_cropped/gemstones_blue/SE/gemstones_blue_SE_315.0_'+_gmf+'.png');lopGem.fr.push(_gmi);}}   // waypoint marker
 // LoP scenery props (static SE billboards; anchor/display-height per prop from the crop tool)
 var LOPPROP={};
 if(ART_LOP){var _PD={column1:{feet:0.927,dh:200},bones1:{feet:0.773,dh:52},bones2:{feet:0.772,dh:40},bricks:{feet:0.848,dh:58},barrel:{feet:0.812,dh:84},crate:{feet:0.763,dh:80},rocks:{feet:0.931,dh:64}};
@@ -424,7 +425,7 @@ function drawCoinPile(c,x,yGround,z,tier,pop){
 
 var AFFIXES,HBASE,HATTRS,SKILLDATA,CASTS=[],NOVAS=[];  // hero state lives on DGC.Hero P; NOVAS = boss poison-nova rings
 var P,En,Se,Dr,Tx,Decals,gilt,depth,portal,entranceCell,dead,banner,bannerT,won,maxZone;
-var bezel=null,returnDepth=1,nearBezel=false,bezelCv=null,braziers=[],structs=[],stones=[],grassD=[],lopProps=[],torches=[];   // ...town props; lopProps = LoP scenery (columns/debris); torches = wall-mounted LoP torches
+var bezel=null,returnDepth=1,nearBezel=false,bezelCv=null,braziers=[],structs=[],stones=[],grassD=[],lopProps=[],torches=[],wpPos=null;   // ...town props; lopProps = LoP scenery; torches = wall torches; wpPos = waypoint marker for lighting
 // chroma-key Bezel's green-screen render to a transparent canvas (drawn as a town billboard)
 function keyGreen(img){var c=document.createElement('canvas');c.width=img.width;c.height=img.height;var x=c.getContext('2d');x.drawImage(img,0,0);try{var d=x.getImageData(0,0,c.width,c.height),p=d.data;for(var i=0;i<p.length;i+=4){var r=p[i],g=p[i+1],b=p[i+2];if(g>85&&g>r*1.3&&g>b*1.3)p[i+3]=0;}x.putImageData(d,0,0);}catch(e){}return c;}
 (function(){var bi=new Image();bi.onload=function(){bezelCv=keyGreen(bi);};bi.src='art/ui/bezel.png';})();
@@ -595,14 +596,24 @@ function spawn(d){
     lopProps=ART_LOP?[{name:'column1',x:25*TS,y:19*TS},{name:'column1',x:35*TS,y:19*TS},{name:'crate',x:27*TS,y:28*TS},{name:'barrel',x:33*TS,y:28*TS},{name:'bones1',x:29*TS,y:32*TS},{name:'bricks',x:37*TS,y:25*TS}]:[];torches=[];   // LoP camp scenery (town is hand-placed)
     for(var rvy=25;rvy<40;rvy++)for(var rvx=0;rvx<10;rvx++)map.block(rvx,rvy);   // TILE_RIVER (X0-10,Y25-40) blocks movement
     var FP=[[28,20,2,2,'campfire'],[30,19,2,1,'chest'],[15,10,3,3,'forge'],[15,30,4,2,'wagon'],[18,28,4,2,'wagon'],[12,28,3,3,'cargo'],[45,30,4,4,'tent'],[40,5,2,2,'sentry'],[48,15,2,2,'sentry']];   // blueprint structures [gx,gy,w,h,kind]
-    structs=[];FP.forEach(function(f){for(var yy=f[1];yy<f[1]+f[3];yy++)for(var xx=f[0];xx<f[0]+f[2];xx++)map.block(xx,yy);structs.push({kind:f[4],x:(f[0]+f[2]/2)*TS,y:(f[1]+f[3])*TS,t:0});});
-    structs.push({kind:'rune',x:21*TS,y:25*TS,t:0});   // TILE_RUNE 2x2 @20,24 walkable cyan decal
+    structs=[];FP.forEach(function(f){
+      for(var yy=f[1];yy<f[1]+f[3];yy++)for(var xx=f[0];xx<f[0]+f[2];xx++)map.block(xx,yy);   // keep collision footprint
+      var fk=f[4],fcx=(f[0]+f[2]/2)*TS,fcy=(f[1]+f[3]/2)*TS;
+      if(ART_LOP){   // reskin to nearest LoP prop (no wagon/forge/tent/sentry in the pack)
+        if(fk==='campfire'||fk==='forge')braziers.push({x:fcx,y:fcy,t:braziers.length*9});                  // fire -> brazier (also lights)
+        else if(fk==='tent'||fk==='sentry')lopProps.push({name:'column1',x:fcx,y:fcy});                     // structure -> column
+        else if(fk==='cargo'||fk==='wagon'){lopProps.push({name:'crate',x:fcx-16,y:fcy+4});lopProps.push({name:'barrel',x:fcx+16,y:fcy-4});lopProps.push({name:'crate',x:fcx+2,y:fcy+16});}  // stockpile -> crates+barrel
+        else if(fk==='chest')lopProps.push({name:'crate',x:fcx,y:fcy});                                     // chest -> crate
+        else structs.push({kind:fk,x:fcx,y:fcy,t:0});
+      } else structs.push({kind:fk,x:(f[0]+f[2]/2)*TS,y:(f[1]+f[3])*TS,t:0});
+    });
+    structs.push({kind:'rune',x:21*TS,y:25*TS,t:0});wpPos=ART_LOP?{x:21*TS,y:25*TS}:null;   // waypoint (reskinned to a LoP gem under ART_LOP; keeps Travel function)
     stones=[];for(var _q=0;_q<60;_q++){var _sgx=2+(RNG()*(GW-4)|0),_sgy=2+(RNG()*(GH-4)|0);if(materialKeyAt(_sgx,_sgy)!=='grass')continue;if(!map.walkable((_sgx+0.5)*TS,(_sgy+0.5)*TS))continue;stones.push({x:(_sgx+0.2+RNG()*0.6)*TS,y:(_sgy+0.2+RNG()*0.6)*TS,dir:(RNG()*8|0),sc:0.45+RNG()*0.95,flip:RNG()<0.5});map.block(_sgx,_sgy);}   // scatter on open grass: random rotation angle, size, flip
     grassD=[];for(var _g=0;_g<150;_g++){var _ggx=2+(RNG()*(GW-4)|0),_ggy=2+(RNG()*(GH-4)|0);if(materialKeyAt(_ggx,_ggy)!=='grass')continue;if(!map.walkable((_ggx+0.5)*TS,(_ggy+0.5)*TS))continue;grassD.push({x:(_ggx+0.15+RNG()*0.7)*TS,y:(_ggy+0.15+RNG()*0.7)*TS,dir:(RNG()*8|0),sc:0.4+RNG()*0.7,flip:RNG()<0.5});}   // walk-through grass tufts (no map.block)
     banner=180;bannerT='The Gilded Hold — trade with Bezel (F), then open a Portal (P) to descend';return;
   }
   var zone=ACT1[d]||ACT1[ACT1_LAST],isFinale=(zone.boss===MAIDEN);
-  bezel=null;braziers=[];structs=[];stones=[];grassD=[];lopProps=[];torches=[];
+  bezel=null;braziers=[];structs=[];stones=[];grassD=[];lopProps=[];torches=[];wpPos=null;
   if(ART_LOP)placeLopScenery();   // STRUCTURE-AWARE placement (keys off rooms[]/walls/junctions, not random scatter)
   portal=isFinale?null:{x:(exitRoom.cx+0.5)*TS,y:(exitRoom.cy+0.5)*TS,t:0};   // the finale has NO rift — the Maiden is the objective
   // populate the zone from its habitat (Allowed_Monsters), area-level scaled, + synergy packs
@@ -811,6 +822,7 @@ function drawStruct(ctx,r,s){
   var p=r.project(s.x,s.y);s.t=(s.t||0)+1;var t=s.t,cv=PROPCV[s.kind];
   function glow(x,y,rad,col){ctx.save();ctx.globalCompositeOperation='lighter';var g=ctx.createRadialGradient(x,y,2,x,y,rad);g.addColorStop(0,col);g.addColorStop(1,col.replace(/[\d.]+\)$/,'0)'));ctx.fillStyle=g;ctx.beginPath();ctx.arc(x,y,rad,0,6.28);ctx.fill();ctx.restore();}
   if(s.kind==='rune'){var pu=0.55+0.45*Math.sin(t*0.08);                                   // waypoint — Leonardo rune-slab decal, canvas fallback below
+    if(ART_LOP&&lopGem){var gmi=lopGem.fr[(t/8|0)%lopGem.nfr];glow(p.x,p.y-10,54*pu,'rgba(80,200,235,'+(0.5*pu)+')');if(gmi&&gmi.complete&&gmi.naturalWidth){var gmdh=62,gmdw=gmdh*gmi.naturalWidth/gmi.naturalHeight;ctx.imageSmoothingEnabled=true;ctx.drawImage(gmi,(p.x-gmdw/2)|0,(p.y-gmdh*lopGem.FEET)|0,gmdw|0,gmdh|0);}return;}   // LoP gem waypoint
     var rcv=PROPCV.rune_slab;if(rcv){var rw=66;glow(p.x,p.y,42*pu,'rgba(60,200,225,'+(0.4*pu)+')');ctx.save();ctx.imageSmoothingEnabled=true;ctx.translate(p.x,p.y);ctx.scale(1,0.55);ctx.drawImage(rcv,(-rw/2)|0,(-rw/2)|0,rw,rw);ctx.restore();return;}
     ctx.save();ctx.translate(p.x,p.y);ctx.scale(1,0.5);
     glow(0,0,46*pu,'rgba(60,200,225,'+(0.42*pu)+')');
@@ -891,12 +903,14 @@ function draw(){
   // placed braziers: punch a light pool into the darkness around each (explored ones only) so rooms are LIT
   for(var _lb=0;_lb<braziers.length;_lb++){var _bz=braziers[_lb],_bgx=(_bz.x/TS)|0,_bgy=(_bz.y/TS)|0;if(SEEN&&SEEN[_bgy]&&!SEEN[_bgy][_bgx])continue;var _bp=mr.project(_bz.x,_bz.y),_bx=_bp.x/LSC,_by=(_bp.y-26)/LSC;if(_bx<-50||_by<-50||_bx>LW+50||_by>LH+50)continue;var _rg=lctx.createRadialGradient(_bx,_by,2,_bx,_by,(TS*3.6)/LSC);_rg.addColorStop(0,'rgba(0,0,0,0.95)');_rg.addColorStop(0.6,'rgba(0,0,0,0.5)');_rg.addColorStop(1,'rgba(0,0,0,0)');lctx.fillStyle=_rg;lctx.fillRect(0,0,LW,LH);}
   for(var _lt=0;_lt<torches.length;_lt++){var _tz=torches[_lt],_tgx=(_tz.x/TS)|0,_tgy=(_tz.y/TS)|0;if(SEEN&&SEEN[_tgy]&&!SEEN[_tgy][_tgx])continue;var _tp=mr.project(_tz.x,_tz.y),_tx=_tp.x/LSC,_ty=(_tp.y-(_tz.rz||44)-8)/LSC;if(_tx<-50||_ty<-50||_tx>LW+50||_ty>LH+50)continue;var _trg=lctx.createRadialGradient(_tx,_ty,2,_tx,_ty,(TS*2.0)/LSC);_trg.addColorStop(0,'rgba(0,0,0,0.9)');_trg.addColorStop(0.6,'rgba(0,0,0,0.45)');_trg.addColorStop(1,'rgba(0,0,0,0)');lctx.fillStyle=_trg;lctx.fillRect(0,0,LW,LH);}
+  if(ART_LOP&&wpPos){var _wpp=mr.project(wpPos.x,wpPos.y),_wpx=_wpp.x/LSC,_wpy=(_wpp.y-10)/LSC;var _wprg=lctx.createRadialGradient(_wpx,_wpy,2,_wpx,_wpy,(TS*2.6)/LSC);_wprg.addColorStop(0,'rgba(0,0,0,0.92)');_wprg.addColorStop(0.6,'rgba(0,0,0,0.45)');_wprg.addColorStop(1,'rgba(0,0,0,0)');lctx.fillStyle=_wprg;lctx.fillRect(0,0,LW,LH);}   // waypoint reveal
   lctx.globalCompositeOperation='source-over';
   // warm torch glow — restored to the pre-memory-light look: one warm radial centred on the hero (explored memory-light stays cool/neutral)
   var hs=mr.project(P.x,P.y);
   var wg=lctx.createRadialGradient(hs.x/LSC,hs.y/LSC,2,hs.x/LSC,hs.y/LSC,(TS*3.2)/LSC);wg.addColorStop(0,'rgba(255,150,70,0.17)');wg.addColorStop(1,'rgba(255,150,70,0)');lctx.fillStyle=wg;lctx.fillRect(0,0,LW,LH);
   for(var _wb=0;_wb<braziers.length;_wb++){var _wz=braziers[_wb],_wgx=(_wz.x/TS)|0,_wgy=(_wz.y/TS)|0;if(SEEN&&SEEN[_wgy]&&!SEEN[_wgy][_wgx])continue;var _wp=mr.project(_wz.x,_wz.y),_wx=_wp.x/LSC,_wy=(_wp.y-30)/LSC;if(_wx<-50||_wy<-50||_wx>LW+50||_wy>LH+50)continue;var _wfl=0.8+0.2*Math.sin((_wz.t||0)*0.2),_wrg=lctx.createRadialGradient(_wx,_wy,2,_wx,_wy,(TS*3.8)/LSC);_wrg.addColorStop(0,'rgba(255,152,72,'+(0.34*_wfl)+')');_wrg.addColorStop(1,'rgba(255,150,70,0)');lctx.fillStyle=_wrg;lctx.fillRect(0,0,LW,LH);}   // warm glow at each placed brazier
   for(var _tg=0;_tg<torches.length;_tg++){var _tz2=torches[_tg],_t2gx=(_tz2.x/TS)|0,_t2gy=(_tz2.y/TS)|0;if(SEEN&&SEEN[_t2gy]&&!SEEN[_t2gy][_t2gx])continue;var _t2p=mr.project(_tz2.x,_tz2.y),_t2x=_t2p.x/LSC,_t2y=(_t2p.y-(_tz2.rz||44)-8)/LSC;if(_t2x<-50||_t2y<-50||_t2x>LW+50||_t2y>LH+50)continue;var _t2fl=0.8+0.2*Math.sin((_tz2.t||0)*0.3),_t2rg=lctx.createRadialGradient(_t2x,_t2y,2,_t2x,_t2y,(TS*2.4)/LSC);_t2rg.addColorStop(0,'rgba(255,150,70,'+(0.3*_t2fl)+')');_t2rg.addColorStop(1,'rgba(255,150,70,0)');lctx.fillStyle=_t2rg;lctx.fillRect(0,0,LW,LH);}   // warm glow at each wall torch
+  if(ART_LOP&&wpPos){var _wgp=mr.project(wpPos.x,wpPos.y),_wgx=_wgp.x/LSC,_wgy=(_wgp.y-10)/LSC;var _wgrg=lctx.createRadialGradient(_wgx,_wgy,2,_wgx,_wgy,(TS*3.0)/LSC);_wgrg.addColorStop(0,'rgba(70,190,235,0.34)');_wgrg.addColorStop(1,'rgba(60,200,225,0)');lctx.fillStyle=_wgrg;lctx.fillRect(0,0,LW,LH);}   // cyan waypoint glow
   if(location.search.indexOf('bright')<0&&(depth!==0||ART_LOP)){ctx.imageSmoothingEnabled=true;ctx.filter='blur(6px)';ctx.drawImage(lightCv,0,0,LW,LH,0,0,CW,CH);ctx.filter='none';}  // torch darkness (full-LoP also darkens town for mood)
   if(depth>0){var _zt=({wilderness:'rgba(74,82,52,0.07)',cave:'rgba(64,46,34,0.11)',forest:'rgba(34,72,42,0.12)',marsh:'rgba(56,78,46,0.13)',graveyard:'rgba(72,84,104,0.10)',dungeon:'rgba(44,32,58,0.06)'})[((ACT1[depth]&&ACT1[depth].type)||'').toLowerCase()];if(_zt){ctx.fillStyle=_zt;ctx.fillRect(0,0,CW,CH);}}  // per-zone-type ambient mood wash
   ctx.restore();   // end world view-zoom — HUD below draws at 1x
