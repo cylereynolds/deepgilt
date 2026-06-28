@@ -283,6 +283,7 @@
 <script src="dg/core/maprenderer.js?v=10"></script>
 <script src="dg/core/assets.js"></script>
 <script src="dg/core/animation.js"></script>
+<script src="dg/core/lopanim.js"></script>
 <script src="dg/core/path.js"></script>
 <script src="dg/core/records.js?v=2"></script>
 <script src="dg/core/hero.js?v=9"></script>
@@ -558,7 +559,7 @@ function spawn(d){
   });
   banner=180;bannerT=zone.name+' — Area Level '+zone.aLvl+(isFinale?' · slay the Maiden of Anguish':' · find the rift');
 }
-function makeHero(){var h=new DGC.Hero(CLASSID,HATTRS);h.anim=mkAnim(BAKED_CLASSES[CLASSID]?CLASSID:null);h.equip.weapon=mkItem('weapon',30,'Rare',{dmg_min:18,dmg_max:41},'Reaping Scythe');h.equip.weapon.iLvl=1;h.equip.weapon.wsm=0;h.equip.weapon.maxDur=40;h.equip.weapon.dur=40;h.recompute();h.buildSkills(SKILLDATA);h.hp=h.mhp;h.charge=h.mcharge;h.staminaBuff=0;h._running=false;h.runIntent=false;h._winded=false;h._shift=false;return h;}  // mstam/stam now set by recompute (Vigor-scaled)
+function makeHero(){var h=new DGC.Hero(CLASSID,HATTRS);h.anim=(ART_LOP&&DGC.LopAnim)?new DGC.LopAnim('warrior'):mkAnim(BAKED_CLASSES[CLASSID]?CLASSID:null);h.equip.weapon=mkItem('weapon',30,'Rare',{dmg_min:18,dmg_max:41},'Reaping Scythe');h.equip.weapon.iLvl=1;h.equip.weapon.wsm=0;h.equip.weapon.maxDur=40;h.equip.weapon.dur=40;h.recompute();h.buildSkills(SKILLDATA);h.hp=h.mhp;h.charge=h.mcharge;h.staminaBuff=0;h._running=false;h.runIntent=false;h._winded=false;h._shift=false;return h;}  // mstam/stam now set by recompute (Vigor-scaled)
 function reset(){
   P=makeHero();P.x=CW/2;P.y=CH/2;P.tx=CW/2;P.ty=CH/2;
   Se=[];Tx=[];CASTS=[];Decals=[];gilt=100000;dead=false;won=false;returnDepth=1;maxZone=1;spawn(0);   // start with 1 Gold (raw Bronze) for testing the economy
@@ -601,7 +602,7 @@ function step(){
   }else P.stam=Math.min(P.mstam,P.stam+0.6);                            // idle regen
   P.stam=Math.min(P.stam,P.mstam);P._running=running;                  // P._running → running ERASES physical defense (monster attack reads it)
   var spd=P.spd*(running?1.85:1)*(1-speedPen);
-  if(moving){map.tryMove(P,P.x+dx/dl*spd,P.y+dy/dl*spd);if(Math.abs(dx)>1)P.face=dx<0?-1:1;P.dir=dirOf(dx,dy);}
+  if(moving){map.tryMove(P,P.x+dx/dl*spd,P.y+dy/dl*spd);if(Math.abs(dx)>1)P.face=dx<0?-1:1;P.dir=dirOf(dx,dy);if(ART_LOP&&P.anim.faceVec)P.anim.faceVec(dx,dy);}
   else if(P.path){P.pi++;if(P.pi<P.path.length){P.tx=P.path[P.pi].x;P.ty=P.path[P.pi].y;}else P.path=null;}  // advance to next waypoint
   P.anim.update(dl>4||!!P.path);
   if(P.acd>0)P.acd--;if(P.swing>0)P.swing--;
@@ -609,7 +610,7 @@ function step(){
   if(tg&&tg.d<40&&P.acd<=0){
     wearWeapon();   // a swing wears the weapon
     var r=DG.resolveAttack(P.derived,DG.toDefender(tg.e.mon),P.wpack,P.lvl,tg.e.mon.level,RNG);
-    var _wsm=(P.equip.weapon&&P.equip.weapon.wsm)||0;P.acd=Math.max(8,Math.round(32*(1+_wsm/100)/(1+(P.derived.attack_speed||0)/100)));P.swing=9;P.face=tg.e.x<P.x?-1:1;P.dir=dirOf(tg.e.x-P.x,tg.e.y-P.y);P.anim.play('attack',{force:true});  // base 32f × weapon WSM ÷ attack-speed affixes
+    var _wsm=(P.equip.weapon&&P.equip.weapon.wsm)||0;P.acd=Math.max(8,Math.round(32*(1+_wsm/100)/(1+(P.derived.attack_speed||0)/100)));P.swing=9;P.face=tg.e.x<P.x?-1:1;P.dir=dirOf(tg.e.x-P.x,tg.e.y-P.y);if(ART_LOP&&P.anim.faceVec)P.anim.faceVec(tg.e.x-P.x,tg.e.y-P.y);P.anim.play('attack',{force:true});  // base 32f × weapon WSM ÷ attack-speed affixes
     if(r.hit){var e=tg.e;
       if(RNG()*100<(P.derived.crush||0)){e.hp-=e.hp*(e.boss?0.125:0.25);addT(e.x,e.y-36,'CRUSH','#ff6b3a');}  // Crushing Blow: % of CURRENT hp, before normal damage (boss half)
       e.hp-=r.damage;e.fl=6;hurt(e);
@@ -710,7 +711,7 @@ function drawMon(ctx,r,en){
     if(en.hp<en.maxhp&&(en.champ||en.boss)){var bw=en.boss?72:42,hf=Math.max(0,en.hp/en.maxhp);ctx.fillStyle='rgba(0,0,0,.6)';ctx.fillRect((p.x-bw/2)|0,(p.y-H-4)|0,bw,4);ctx.fillStyle=en.boss?'#e0484a':'#d8884a';ctx.fillRect((p.x-bw/2)|0,(p.y-H-4)|0,(bw*hf)|0,4);}
   }
 }
-function drawHero(ctx,r){var p=r.project(P.x,P.y);P.anim.face((P.dir+ISO_DIR)&7);
+function drawHero(ctx,r){var p=r.project(P.x,P.y);if(!ART_LOP)P.anim.face((P.dir+ISO_DIR)&7);   // LoP: dir set via faceVec on move/attack (16-dir)
   if(P.swing>0){ctx.strokeStyle='rgba(255,217,107,'+(P.swing/9*0.7)+')';ctx.lineWidth=3;ctx.save();ctx.translate(p.x,p.y-16);ctx.scale(1,0.5);ctx.beginPath();ctx.arc(0,0,26,0,6.28);ctx.stroke();ctx.restore();}
   if(!P.anim.draw(ctx,p.x,p.y,90*SPR))blit(sHero,p.x,p.y,P.face===-1);}
 function drawPortal(ctx,r){if(!portal)return;var pp=r.project(portal.x,portal.y),pr=16+Math.sin(portal.t*0.12)*4;ctx.strokeStyle='#ffcf5c';ctx.lineWidth=3;ctx.save();ctx.translate(pp.x,pp.y);ctx.scale(1,0.5);ctx.globalAlpha=0.85;ctx.beginPath();ctx.arc(0,0,pr,0,6.28);ctx.stroke();ctx.globalAlpha=0.35;ctx.beginPath();ctx.arc(0,0,pr+8,0,6.28);ctx.stroke();ctx.restore();ctx.globalAlpha=1;}

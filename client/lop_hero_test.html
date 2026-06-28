@@ -1,0 +1,56 @@
+<!doctype html><html><head><meta charset="utf-8"><title>LoP warrior — LopAnim on LoP ground (stable harness)</title>
+<style>
+  html,body{margin:0;background:#0b0a0d;color:#cdbfa6;font:13px system-ui;overflow:hidden}
+  #c{display:block;margin:0 auto;background:#0b0a0d}
+  #hud{position:fixed;left:8px;top:6px;opacity:.9;text-shadow:0 1px 3px #000}
+</style></head><body>
+<div id="hud"></div>
+<canvas id="c" width="1000" height="680"></canvas>
+<script src="dg/common/iso.js"></script>
+<script src="dg/core/mapengine.js"></script>
+<script src="dg/core/maprenderer.js"></script>
+<script src="dg/core/animation.js"></script>
+<script src="dg/core/lopanim.js"></script>
+<script>
+(function(){
+  // drives the SAME DGC.LopAnim the game uses, but via setInterval (no rAF freeze) at the real
+  // 128/64 projection (iso.js). ?mode=walk|idle|attack&moving=1 ; auto-rotates 16 dirs unless ?dir=N.
+  var DGC=window.DGC, cv=document.getElementById('c'), ctx=cv.getContext('2d'), CW=cv.width, CH=cv.height;
+  var Q=new URLSearchParams(location.search);
+  var MODE=Q.get('mode')||'walk', MOVING=Q.get('moving')!=='0', FIXDIR=Q.has('dir')?+Q.get('dir'):null;
+  var GW=18,GH=18,TS=32;
+  var map=new DGC.MapEngine(GW,GH,TS,Math.random),cells=[];
+  for(var y=0;y<GH;y++){cells[y]=[];for(var x=0;x<GW;x++)cells[y][x]=(x===0||y===0||x===GW-1||y===GH-1)?1:0;}
+  map.cells=cells;map.rooms=[{x:1,y:1,w:GW-2,h:GH-2,cx:GW>>1,cy:GH>>1}];map.exitRoom=map.rooms[0];map.specials=[];
+  var iso=DGC.Iso(GW,GH,TS),mr=new DGC.MapRenderer(map,iso);   // iso.js = real 128/64
+  var LROOT='art/lords_of_pain/environment/';
+  function img(u){var i=new Image();i.src=u;return i;}
+  var stone=img(LROOT+'ground_stone1.png'),ov1=img(LROOT+'ground_variation1.png'),ov2=img(LROOT+'ground_variation2.png');
+
+  var anim=new DGC.LopAnim('warrior'); anim.play(MODE);
+  var DIRNAMES=['E','NEE','NE','NNE','N','NNW','NW','NWW','W','SWW','SW','SSW','S','SSE','SE','SEE'];
+  var hx=(GW*0.5)*TS, hy=(GH*0.5)*TS;
+  var SPR=iso.TW/64;          // same scale knob as the game
+  var tick=0;
+
+  function ground(){ mr.buildGroundLOP(stone, stone.complete&&stone.naturalWidth>0, [ov1,ov2]); }
+  function draw(){
+    if(!mr.ground) ground();
+    tick++;
+    if(FIXDIR!=null) anim.dir=FIXDIR; else if(tick%12===0) anim.dir=(anim.dir+1)%16;  // auto-rotate to show all 16
+    anim.update(MOVING);
+    document.getElementById('hud').textContent='LoP warrior · LopAnim · TW='+iso.TW+'/TH='+iso.TH+' · mode='+anim.mode+' · dir='+anim.dir+' ('+DIRNAMES[anim.dir]+') · frame='+anim.frame;
+    ctx.clearRect(0,0,CW,CH);
+    mr.render(ctx,CW,CH,hx,hy,[{k:(hx+hy)/TS,draw:function(c,r){
+      var p=r.project(hx,hy);
+      // contact marker at the exact ground point (to verify the feet anchor)
+      c.save();c.globalAlpha=0.5;c.strokeStyle='#39d0ff';c.beginPath();c.ellipse(p.x,p.y,10,5,0,0,6.28);c.stroke();c.restore();
+      anim.draw(c,p.x,p.y,90*SPR);
+    }}]);
+  }
+  [stone,ov1,ov2].forEach(function(im){im.onload=function(){mr.ground=null;};});
+  draw(); setInterval(draw, MODE==='attack'?120:140);
+  window.__a=anim;
+})();
+</script>
+</body></html>
