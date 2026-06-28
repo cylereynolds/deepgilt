@@ -1,11 +1,11 @@
-<!doctype html><html><head><meta charset="utf-8"><title>Lords of Pain — ground test (real renderer, TW=64/TH=32)</title>
+<!doctype html><html><head><meta charset="utf-8"><title>Lords of Pain — scale compare (?ts=64|128|192)</title>
 <style>
   html,body{margin:0;background:#0b0a0d;color:#cdbfa6;font:13px system-ui;overflow:hidden}
   #c{display:block;margin:0 auto;background:#0b0a0d;image-rendering:auto}
-  #hud{position:fixed;left:8px;top:6px;opacity:.8;font-size:12px;pointer-events:none;text-shadow:0 1px 2px #000}
+  #hud{position:fixed;left:8px;top:6px;opacity:.85;font-size:13px;pointer-events:none;text-shadow:0 1px 3px #000}
 </style></head><body>
-<div id="hud">Lords of Pain ground · real renderer · TW=64/TH=32 · native colors (no grade)</div>
-<canvas id="c" width="1000" height="680"></canvas>
+<div id="hud"></div>
+<canvas id="c" width="1120" height="720"></canvas>
 <!-- the ACTUAL engine modules (same files index.html loads) -->
 <script src="dg/common/iso.js"></script>
 <script src="dg/core/mapengine.js"></script>
@@ -14,14 +14,31 @@
 (function(){
   var DGC=window.DGC, cv=document.getElementById('c'), ctx=cv.getContext('2d');
   var CW=cv.width, CH=cv.height;
-  var GW=22, GH=22, TS=32;
 
-  // --- open arena: floor interior + 1-cell wall ring (gives wall cubes for context) ---
+  // --- tile size from URL (?ts=64|128|192). 64 = the real client's projection. 2:1 dimetric. ---
+  var TS_SCREEN = parseInt((location.search.match(/ts=(\d+)/)||[])[1],10) || 64;
+  var TW = TS_SCREEN, TH = TS_SCREEN/2, WALLZ = Math.round(TS_SCREEN*0.47);   // WALLZ scales with tile (≈30 at 64)
+  var SCALE = TW/64;                                                          // sprite display scale relative to the 64/32 baseline
+  document.getElementById('hud').textContent =
+    'Lords of Pain · TW='+TW+'/TH='+TH+(TS_SCREEN===64?' (current)':' (Option B)')+' · SCALE×'+SCALE.toFixed(2)+' · native colors, no grade';
+
+  // --- makeIso: iso.js's projection math, but with PARAMETERIZED TW/TH (harness-only; iso.js untouched) ---
+  function makeIso(GW,GH,TS,TW,TH,WALLZ){
+    var OX=GH*(TW/2)+TW/2, OY=WALLZ+TH;
+    var GCW=(GW+GH)*(TW/2)+TW, GCH=(GW+GH)*(TH/2)+OY+TH;
+    function isoC(gx,gy){return {x:(gx-gy)*(TW/2)+OX, y:(gx+gy)*(TH/2)+OY};}
+    function w2i(wx,wy){return isoC(wx/TS,wy/TS);}
+    function i2w(ix,iy){var ax=ix-OX,ay=iy-OY;var gx=(ax/(TW/2)+ay/(TH/2))/2,gy=(ay/(TH/2)-ax/(TW/2))/2;return {x:gx*TS,y:gy*TS};}
+    return {TW:TW,TH:TH,WALLZ:WALLZ,OX:OX,OY:OY,GCW:GCW,GCH:GCH,isoC:isoC,w2i:w2i,i2w:i2w};
+  }
+
+  var GW=24, GH=24, TS=32;
+  // open arena: floor interior + 1-cell wall ring (gives wall cubes for context)
   var map=new DGC.MapEngine(GW,GH,TS,Math.random), c=[];
   for(var y=0;y<GH;y++){c[y]=[];for(var x=0;x<GW;x++)c[y][x]=(x===0||y===0||x===GW-1||y===GH-1)?1:0;}
   map.cells=c; map.rooms=[{x:1,y:1,w:GW-2,h:GH-2,cx:GW>>1,cy:GH>>1}]; map.exitRoom=map.rooms[0]; map.specials=[];
 
-  var iso=DGC.Iso(GW,GH,TS), mr=new DGC.MapRenderer(map,iso);
+  var iso=makeIso(GW,GH,TS,TW,TH,WALLZ), mr=new DGC.MapRenderer(map,iso);
 
   // --- load LoP assets ---
   var ROOT='art/lords_of_pain/';
@@ -40,20 +57,19 @@
   };
   var hero=img('playable character/warrior/warrior_default_idle/SE/warrior_default_idle_SE_315.0_0.png');
 
-  // scene placement in GRID coords (gx,gy); world = (g+0.5)*TS
+  // tight cluster around the hero so it stays in-frame even at TW=192. sz = size at TW=64; scaled by SCALE.
   var SCENE=[
-    {t:'column1',gx:7,gy:7,sz:300},{t:'column1',gx:15,gy:7,sz:300},{t:'column1',gx:7,gy:15,sz:300},{t:'column1',gx:15,gy:15,sz:300},
-    {t:'brazier_lit',gx:11,gy:7,sz:280},
-    {t:'crate',gx:8,gy:9,sz:250},{t:'barrel',gx:9,gy:9,sz:250},{t:'barrel',gx:14,gy:12,sz:250},
-    {t:'rocks',gx:8,gy:13,sz:240},{t:'rocks',gx:13,gy:9,sz:240},
-    {t:'bones1',gx:9,gy:14,sz:240},{t:'bones2',gx:13,gy:13,sz:240},
-    {t:'mushrooms',gx:8,gy:11,sz:240},{t:'mushrooms',gx:14,gy:9,sz:240}
+    {t:'column1',gx:9,gy:9,sz:300},{t:'column1',gx:15,gy:9,sz:300},{t:'column1',gx:9,gy:15,sz:300},{t:'column1',gx:15,gy:15,sz:300},
+    {t:'brazier_lit',gx:12,gy:9,sz:280},
+    {t:'crate',gx:10,gy:11,sz:250},{t:'barrel',gx:11,gy:11,sz:250},{t:'barrel',gx:14,gy:13,sz:250},
+    {t:'rocks',gx:10,gy:13,sz:240},{t:'rocks',gx:13,gy:11,sz:240},
+    {t:'bones1',gx:11,gy:14,sz:240},{t:'bones2',gx:13,gy:13,sz:240},
+    {t:'mushrooms',gx:10,gy:12,sz:240},{t:'mushrooms',gx:14,gy:11,sz:240}
   ];
-  var HERO={gx:11,gy:11};
+  var HERO={gx:12,gy:12};
   function W(g){return (g+0.5)*TS;}
-  // draw a 256 LoP frame anchored so the figure's feet/base sit on the ground point p.
-  // figure sits ~ centre-x, ~0.60 down the frame (feet); baked shadow is part of the frame.
-  function blitLOP(c2,frame,px,py,sz){ if(!frame.complete||!frame.naturalWidth)return;
+  // anchor a 256 LoP frame (scaled) so the figure's feet/base sit on the ground point p (figure ~0.60 down the frame)
+  function blitLOP(c2,frame,px,py,sz){ if(!frame.complete||!frame.naturalWidth)return; sz=sz*SCALE;
     c2.imageSmoothingEnabled=true; c2.drawImage(frame, (px-sz/2)|0, (py-sz*0.60)|0, sz|0, sz|0); }
 
   function drawables(){
@@ -69,11 +85,10 @@
   function draw(){ if(!mr.ground) rebuild(); ctx.clearRect(0,0,CW,CH);
     mr.render(ctx,CW,CH, W(HERO.gx), W(HERO.gy), drawables()); }
 
-  // rebuild ground whenever an asset finishes; keep drawing (setInterval survives unfocused tab)
   [stone,ov1,ov2].forEach(function(im){im.onload=function(){mr.ground=null;draw();};});
   Object.keys(PROP).forEach(function(k){PROP[k].onload=draw;}); hero.onload=draw;
   draw(); setInterval(draw,250);
-  window.__draw=draw;
+  window.__draw=draw; window.__ts=TS_SCREEN;
 })();
 </script>
 </body></html>
