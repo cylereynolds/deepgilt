@@ -196,15 +196,24 @@
   // world px -> screen px (valid after camera is set in render())
   P.project = function (wx, wy) { var p = this.iso.w2i(wx, wy); return { x: p.x - this.camX, y: p.y - this.camY }; };
 
-  // one iso wall cube at grid (gx,gy): SW face + SE face + raised top diamond
+  // one iso wall cube at grid (gx,gy): SW face + SE face + raised top diamond.
+  // Under _lop, the cube faces are filled with the LoP stone pattern (+ per-face shade) so walls
+  // read as dark stone instead of the flat purple placeholder cubes.
   P.drawWallIso = function (ctx, gx, gy) {
     var iso = this.iso, cx = this.camX, cy = this.camY, h = iso.WALLZ;
     var L = iso.isoC(gx, gy + 1), B = iso.isoC(gx + 1, gy + 1), R = iso.isoC(gx + 1, gy), T = iso.isoC(gx, gy);
     var Lx = L.x - cx, Ly = L.y - cy, Bx = B.x - cx, By = B.y - cy, Rx = R.x - cx, Ry = R.y - cy, Tx = T.x - cx, Ty = T.y - cy;
-    ctx.fillStyle = '#171320'; ctx.beginPath(); ctx.moveTo(Lx, Ly); ctx.lineTo(Bx, By); ctx.lineTo(Bx, By - h); ctx.lineTo(Lx, Ly - h); ctx.closePath(); ctx.fill();
-    ctx.fillStyle = '#241f2e'; ctx.beginPath(); ctx.moveTo(Bx, By); ctx.lineTo(Rx, Ry); ctx.lineTo(Rx, Ry - h); ctx.lineTo(Bx, By - h); ctx.closePath(); ctx.fill();
-    ctx.fillStyle = '#332d3e'; ctx.beginPath(); ctx.moveTo(Tx, Ty - h); ctx.lineTo(Rx, Ry - h); ctx.lineTo(Bx, By - h); ctx.lineTo(Lx, Ly - h); ctx.closePath(); ctx.fill();
-    ctx.strokeStyle = 'rgba(150,140,110,0.16)'; ctx.lineWidth = 1; ctx.stroke();
+    var lop = this._lop && this._stoneImg && this._stoneImg.complete && this._stoneImg.naturalWidth;
+    var pat = null; if (lop) { if (!this._wallPat) this._wallPat = ctx.createPattern(this._stoneImg, 'repeat'); pat = this._wallPat; }
+    function face(pts, base, tint) {
+      ctx.beginPath(); ctx.moveTo(pts[0], pts[1]); for (var i = 2; i < pts.length; i += 2) ctx.lineTo(pts[i], pts[i + 1]); ctx.closePath();
+      ctx.fillStyle = lop ? pat : base; ctx.fill();
+      if (lop) { ctx.fillStyle = tint; ctx.fill(); }
+    }
+    face([Lx, Ly, Bx, By, Bx, By - h, Lx, Ly - h], '#171320', 'rgba(4,3,6,0.58)');      // SW face (darkest)
+    face([Bx, By, Rx, Ry, Rx, Ry - h, Bx, By - h], '#241f2e', 'rgba(8,6,11,0.34)');      // SE face (mid)
+    face([Tx, Ty - h, Rx, Ry - h, Bx, By - h, Lx, Ly - h], '#332d3e', 'rgba(18,13,20,0.10)'); // top (lightest)
+    ctx.strokeStyle = lop ? 'rgba(20,16,12,0.55)' : 'rgba(150,140,110,0.16)'; ctx.lineWidth = 1; ctx.stroke();
   };
 
   // Blit the ground camera window, then draw walls + drawables back-to-front.

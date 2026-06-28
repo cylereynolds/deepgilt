@@ -362,11 +362,18 @@ var townGround=DGC.Assets.texture('art/scene/scenario_ground2.png',function(){if
 // EVAL switch (?art=lop): swap ALL ground for the Lords of Pain pixel-art stone (gitignored pack). Reversible — omit the param for the AI ground. See maprenderer.buildGroundLOP.
 var ART_LOP=location.search.indexOf('art=lop')>=0;
 // LoP sprite mappings (only active under ART_LOP). Unmapped classes/creatures keep their old art.
-var LOP_CLASS={reaver:'warrior',warden:'knight',stalker:'fighter'};   // melee classes -> LoP players; casters pyre/bonewright/feral have NO LoP sprite
-var LOP_MON={crypt_sentinel:'skeleton',crypt_bowman:'skeleton',flesh_scavenger:'slime',maiden_of_anguish:'demonlord',gravelight_horror:'gravelight'};  // undead->skeleton, gooey rot->slime, act-boss demon->demonlord, caster->Blender gravelight (placeholder)
+// FULL-LoP: every class + every creature maps onto a LoP sprite (heavy reuse — pack has only 3 bodies + skeleton/slime/demon)
+var LOP_CLASS={reaver:'warrior',warden:'knight',stalker:'fighter',pyre:'fighter',bonewright:'knight',feral:'warrior'};
+var LOP_MON={
+  thorn_fiend:'skeleton',rotting_corpse:'skeleton',barrow_shaman:'skeleton',blighted_sister:'skeleton',blighted_ranger:'skeleton',
+  crypt_sentinel:'skeleton',crypt_bowman:'skeleton',crypt_magus:'skeleton',tomb_wraith:'skeleton',
+  barrow_imp:'slime',carrion_bat:'slime',carrion_nest:'slime',gravelight_horror:'slime',flesh_scavenger:'slime',cave_crawler:'slime',
+  bog_troll:'demonlord',blood_caprine:'demonlord',graveyard_matron:'demonlord',blood_baroness:'demonlord',cursed_blacksmith:'demonlord',maiden_of_anguish:'demonlord'
+};
 var lopStone=ART_LOP?DGC.Assets.texture('art/lords_of_pain/environment/ground_stone1.png',function(){if(map.cells)rebuildGround();}):null;
 var lopOv1=ART_LOP?DGC.Assets.texture('art/lords_of_pain/environment/ground_variation1.png',function(){if(map.cells)rebuildGround();}):null;
 var lopOv2=ART_LOP?DGC.Assets.texture('art/lords_of_pain/environment/ground_variation2.png',function(){if(map.cells)rebuildGround();}):null;
+if(ART_LOP){mr._lop=true;mr._stoneImg=lopStone;FOVRAD=9.5;}   // stone-texture wall cubes + wider torch (bigger 128 tiles, no placed lights yet)
 function rebuildGround(){
   if(ART_LOP){mr.buildGroundLOP(lopStone,lopStone&&lopStone.ready,[lopOv1,lopOv2]);return;}   // LoP ground for ALL depths during eval
   if(depth===0){if(autotileTex&&autotileTex.ready){mr.buildGroundAuto(autotileTex,true,townTileCell);}else{var g=ENVTEX.t_grass;mr.buildGround(g,g&&g.ready,FPATCH,townZoneTex,townZoneClass);}return;}var ftex=curFloorTex();mr.buildGround(ftex,ftex.ready,FPATCH);}
@@ -732,6 +739,7 @@ function drawBrazier(ctx,r,bz){var p=r.project(bz.x,bz.y);bz.t=(bz.t||0)+1;var f
   ctx.fillStyle='#ff8a3a';ctx.beginPath();ctx.ellipse(p.x,p.y-25,5,11*fl,0,0,6.28);ctx.fill();ctx.fillStyle='#ffd96b';ctx.beginPath();ctx.ellipse(p.x,p.y-24,2.6,6*fl,0,0,6.28);ctx.fill();}  // flame
 // scattered ground stones — baked 3D rotation frames, seated billboard + contact shadow
 function drawStone(ctx,r,s){
+  if(ART_LOP)return;   // full-LoP: drop old AI ground-stones
   var p=r.project(s.x,s.y),im=STONE_DIRS[s.dir];if(!im)return;var sz=40*s.sc*SPR;
   ctx.save();ctx.globalAlpha=0.36;ctx.fillStyle='#000';ctx.beginPath();ctx.ellipse(p.x,p.y,sz*0.34,sz*0.13,0,0,6.28);ctx.fill();ctx.globalAlpha=1;   // contact shadow at the ground point
   ctx.imageSmoothingEnabled=true;var topY=(p.y-0.48*sz)|0;   // seat the rock's CENTER at the ground point so its lower ~26% sinks into the ground (no float)
@@ -741,6 +749,7 @@ function drawStone(ctx,r,s){
 }
 // scattered grass tufts — baked 3D rotation frames, walk-through, soft contact shadow
 function drawGrass(ctx,r,s){
+  if(ART_LOP)return;   // full-LoP: drop old AI grass tufts
   var p=r.project(s.x,s.y),im=GRASS_DIRS[s.dir];if(!im)return;var sz=42*s.sc*SPR;
   ctx.save();ctx.globalAlpha=0.18;ctx.fillStyle='#000';ctx.beginPath();ctx.ellipse(p.x,p.y,sz*0.22,sz*0.08,0,0,6.28);ctx.fill();ctx.globalAlpha=1;   // soft contact shadow
   ctx.imageSmoothingEnabled=true;var topY=(p.y-0.80*sz)|0;   // grass base (~0.85 of frame) at the ground point; blades rise up
@@ -809,7 +818,7 @@ function draw(){
   ctx.textAlign='center';ctx.font='600 13px system-ui';for(var a=0;a<Tx.length;a++){var tp=mr.project(Tx[a].x,Tx[a].y);ctx.globalAlpha=Math.min(1,Tx[a].life/26);ctx.fillStyle=Tx[a].c;ctx.fillText(Tx[a].t,tp.x,tp.y-26-Tx[a].rise);}ctx.globalAlpha=1;
   // --- light: torch cast on the ISO ground, OCCLUDED BY WALLS; each cell's light LERPS toward its target so the lit area never pops/skips (constant, no flicker) ---
   lctx.setTransform(1,0,0,1,0,0);lctx.clearRect(0,0,LW,LH);
-  lctx.fillStyle='rgba(3,2,6,0.90)';lctx.fillRect(0,0,LW,LH);   // UNEXPLORED stays 90% dark — a faint 10% silhouette, never pure black
+  lctx.fillStyle=ART_LOP?'rgba(3,2,6,0.72)':'rgba(3,2,6,0.90)';lctx.fillRect(0,0,LW,LH);   // UNEXPLORED darkness (LoP: lighter so walls/enemies read until placed torches land)
   lctx.globalCompositeOperation='destination-out';
   // EXPL = "memory-light": once a cell has literally been inside the torch (SEEN) it stays lit at 0.4 forever — the explored environment (floor AND walls) remains visible, it does not flicker. The active torch lifts current-FOV cells brighter, up to full.
   var EXPL=0.167,WZ=iso.WALLZ/LSC;   // explored memory-light → ~75% dark on the 0.90 base (0.90 * (1-0.167) ≈ 0.75)
@@ -830,7 +839,7 @@ function draw(){
   // warm torch glow — restored to the pre-memory-light look: one warm radial centred on the hero (explored memory-light stays cool/neutral)
   var hs=mr.project(P.x,P.y);
   var wg=lctx.createRadialGradient(hs.x/LSC,hs.y/LSC,2,hs.x/LSC,hs.y/LSC,(TS*3.2)/LSC);wg.addColorStop(0,'rgba(255,150,70,0.17)');wg.addColorStop(1,'rgba(255,150,70,0)');lctx.fillStyle=wg;lctx.fillRect(0,0,LW,LH);
-  if(location.search.indexOf('bright')<0&&depth!==0){ctx.imageSmoothingEnabled=true;ctx.filter='blur(6px)';ctx.drawImage(lightCv,0,0,LW,LH,0,0,CW,CH);ctx.filter='none';}  // smooth, soft torch edge (?bright or depth 0/town skips darkness — town is fully lit)
+  if(location.search.indexOf('bright')<0&&(depth!==0||ART_LOP)){ctx.imageSmoothingEnabled=true;ctx.filter='blur(6px)';ctx.drawImage(lightCv,0,0,LW,LH,0,0,CW,CH);ctx.filter='none';}  // torch darkness (full-LoP also darkens town for mood)
   if(depth>0){var _zt=({wilderness:'rgba(74,82,52,0.07)',cave:'rgba(64,46,34,0.11)',forest:'rgba(34,72,42,0.12)',marsh:'rgba(56,78,46,0.13)',graveyard:'rgba(72,84,104,0.10)',dungeon:'rgba(44,32,58,0.06)'})[((ACT1[depth]&&ACT1[depth].type)||'').toLowerCase()];if(_zt){ctx.fillStyle=_zt;ctx.fillRect(0,0,CW,CH);}}  // per-zone-type ambient mood wash
   ctx.restore();   // end world view-zoom — HUD below draws at 1x
   syncHUD();   // brand / class / Lvl / Gilt / Depth / Foes now live in the DOM top bar (#topbar)
