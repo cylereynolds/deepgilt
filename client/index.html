@@ -848,10 +848,10 @@ function draw(){
   ctx.textAlign='center';ctx.font='600 13px system-ui';for(var a=0;a<Tx.length;a++){var tp=mr.project(Tx[a].x,Tx[a].y);ctx.globalAlpha=Math.min(1,Tx[a].life/26);ctx.fillStyle=Tx[a].c;ctx.fillText(Tx[a].t,tp.x,tp.y-26-Tx[a].rise);}ctx.globalAlpha=1;
   // --- light: torch cast on the ISO ground, OCCLUDED BY WALLS; each cell's light LERPS toward its target so the lit area never pops/skips (constant, no flicker) ---
   lctx.setTransform(1,0,0,1,0,0);lctx.clearRect(0,0,LW,LH);
-  lctx.fillStyle=ART_LOP?'rgba(3,2,6,0.72)':'rgba(3,2,6,0.90)';lctx.fillRect(0,0,LW,LH);   // UNEXPLORED darkness (LoP: lighter so walls/enemies read until placed torches land)
+  lctx.fillStyle=ART_LOP?'rgba(3,2,6,0.55)':'rgba(3,2,6,0.90)';lctx.fillRect(0,0,LW,LH);   // UNEXPLORED darkness (LoP: lighter so the art reads while staying moody)
   lctx.globalCompositeOperation='destination-out';
   // EXPL = "memory-light": once a cell has literally been inside the torch (SEEN) it stays lit at 0.4 forever — the explored environment (floor AND walls) remains visible, it does not flicker. The active torch lifts current-FOV cells brighter, up to full.
-  var EXPL=0.167,WZ=iso.WALLZ/LSC;   // explored memory-light → ~75% dark on the 0.90 base (0.90 * (1-0.167) ≈ 0.75)
+  var EXPL=(ART_LOP?0.42:0.167),WZ=iso.WALLZ/LSC;   // explored memory-light (LoP lifts it so explored rooms stay clearly readable)
   if(LIT){var BS=(TS*2.2)/LSC;
     for(var lgy=0;lgy<GH;lgy++)for(var lgx=0;lgx<GW;lgx++){
       var vis=VIS[lgy*GW+lgx]||0,visA=Math.min(1,vis*1.25);                  // active-torch brightness (original soft falloff)
@@ -867,12 +867,12 @@ function draw(){
   }
   lctx.globalAlpha=1;
   // placed braziers: punch a light pool into the darkness around each (explored ones only) so rooms are LIT
-  for(var _lb=0;_lb<braziers.length;_lb++){var _bz=braziers[_lb],_bgx=(_bz.x/TS)|0,_bgy=(_bz.y/TS)|0;if(SEEN&&SEEN[_bgy]&&!SEEN[_bgy][_bgx])continue;var _bp=mr.project(_bz.x,_bz.y),_bx=_bp.x/LSC,_by=(_bp.y-26)/LSC;if(_bx<-50||_by<-50||_bx>LW+50||_by>LH+50)continue;var _rg=lctx.createRadialGradient(_bx,_by,2,_bx,_by,(TS*2.6)/LSC);_rg.addColorStop(0,'rgba(0,0,0,0.92)');_rg.addColorStop(1,'rgba(0,0,0,0)');lctx.fillStyle=_rg;lctx.fillRect(0,0,LW,LH);}
+  for(var _lb=0;_lb<braziers.length;_lb++){var _bz=braziers[_lb],_bgx=(_bz.x/TS)|0,_bgy=(_bz.y/TS)|0;if(SEEN&&SEEN[_bgy]&&!SEEN[_bgy][_bgx])continue;var _bp=mr.project(_bz.x,_bz.y),_bx=_bp.x/LSC,_by=(_bp.y-26)/LSC;if(_bx<-50||_by<-50||_bx>LW+50||_by>LH+50)continue;var _rg=lctx.createRadialGradient(_bx,_by,2,_bx,_by,(TS*3.6)/LSC);_rg.addColorStop(0,'rgba(0,0,0,0.95)');_rg.addColorStop(0.6,'rgba(0,0,0,0.5)');_rg.addColorStop(1,'rgba(0,0,0,0)');lctx.fillStyle=_rg;lctx.fillRect(0,0,LW,LH);}
   lctx.globalCompositeOperation='source-over';
   // warm torch glow — restored to the pre-memory-light look: one warm radial centred on the hero (explored memory-light stays cool/neutral)
   var hs=mr.project(P.x,P.y);
   var wg=lctx.createRadialGradient(hs.x/LSC,hs.y/LSC,2,hs.x/LSC,hs.y/LSC,(TS*3.2)/LSC);wg.addColorStop(0,'rgba(255,150,70,0.17)');wg.addColorStop(1,'rgba(255,150,70,0)');lctx.fillStyle=wg;lctx.fillRect(0,0,LW,LH);
-  for(var _wb=0;_wb<braziers.length;_wb++){var _wz=braziers[_wb],_wgx=(_wz.x/TS)|0,_wgy=(_wz.y/TS)|0;if(SEEN&&SEEN[_wgy]&&!SEEN[_wgy][_wgx])continue;var _wp=mr.project(_wz.x,_wz.y),_wx=_wp.x/LSC,_wy=(_wp.y-30)/LSC;if(_wx<-50||_wy<-50||_wx>LW+50||_wy>LH+50)continue;var _wfl=0.8+0.2*Math.sin((_wz.t||0)*0.2),_wrg=lctx.createRadialGradient(_wx,_wy,2,_wx,_wy,(TS*3.0)/LSC);_wrg.addColorStop(0,'rgba(255,150,70,'+(0.24*_wfl)+')');_wrg.addColorStop(1,'rgba(255,150,70,0)');lctx.fillStyle=_wrg;lctx.fillRect(0,0,LW,LH);}   // warm glow at each placed brazier
+  for(var _wb=0;_wb<braziers.length;_wb++){var _wz=braziers[_wb],_wgx=(_wz.x/TS)|0,_wgy=(_wz.y/TS)|0;if(SEEN&&SEEN[_wgy]&&!SEEN[_wgy][_wgx])continue;var _wp=mr.project(_wz.x,_wz.y),_wx=_wp.x/LSC,_wy=(_wp.y-30)/LSC;if(_wx<-50||_wy<-50||_wx>LW+50||_wy>LH+50)continue;var _wfl=0.8+0.2*Math.sin((_wz.t||0)*0.2),_wrg=lctx.createRadialGradient(_wx,_wy,2,_wx,_wy,(TS*3.8)/LSC);_wrg.addColorStop(0,'rgba(255,152,72,'+(0.34*_wfl)+')');_wrg.addColorStop(1,'rgba(255,150,70,0)');lctx.fillStyle=_wrg;lctx.fillRect(0,0,LW,LH);}   // warm glow at each placed brazier
   if(location.search.indexOf('bright')<0&&(depth!==0||ART_LOP)){ctx.imageSmoothingEnabled=true;ctx.filter='blur(6px)';ctx.drawImage(lightCv,0,0,LW,LH,0,0,CW,CH);ctx.filter='none';}  // torch darkness (full-LoP also darkens town for mood)
   if(depth>0){var _zt=({wilderness:'rgba(74,82,52,0.07)',cave:'rgba(64,46,34,0.11)',forest:'rgba(34,72,42,0.12)',marsh:'rgba(56,78,46,0.13)',graveyard:'rgba(72,84,104,0.10)',dungeon:'rgba(44,32,58,0.06)'})[((ACT1[depth]&&ACT1[depth].type)||'').toLowerCase()];if(_zt){ctx.fillStyle=_zt;ctx.fillRect(0,0,CW,CH);}}  // per-zone-type ambient mood wash
   ctx.restore();   // end world view-zoom — HUD below draws at 1x
