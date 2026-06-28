@@ -378,8 +378,10 @@ if(ART_LOP){mr._lop=true;mr._stoneImg=lopStone;FOVRAD=9.5;
   var lopWallSW=new Image();lopWallSW.src=encodeURI('art/lords_of_pain/prop/wall2/SW/wall2_SW_225.0_0.png');   // SW-axis
   mr._wallSE=lopWallSE;mr._wallSW=lopWallSW;}
 // LoP placed-light prop: animated brazier flame (cropped frames, SE view; anchor from _anchor.json)
-var lopBrazier=null;
-if(ART_LOP){lopBrazier={fr:[],nfr:8,FEET:0.842};for(var _bf=0;_bf<8;_bf++){var _bim=new Image();_bim.src=encodeURI('art/lop_cropped/brazier_lit/SE/brazier_lit_SE_315.0_'+_bf+'.png');lopBrazier.fr.push(_bim);}}
+var lopBrazier=null,lopServant=null,lopGold=null;
+if(ART_LOP){lopBrazier={fr:[],nfr:8,FEET:0.842};for(var _bf=0;_bf<8;_bf++){var _bim=new Image();_bim.src=encodeURI('art/lop_cropped/brazier_lit/SE/brazier_lit_SE_315.0_'+_bf+'.png');lopBrazier.fr.push(_bim);}
+  lopServant={fr:[],nfr:8,FEET:0.692};for(var _sf=0;_sf<8;_sf++){var _sim=new Image();_sim.src=encodeURI('art/lop_cropped/subservient/subservient_special_working/SE/subservient_special_working_SE_315.0_'+_sf+'.png');lopServant.fr.push(_sim);}   // Bezel NPC
+  lopGold={fr:[],nfr:8,FEET:0.702};for(var _gf=0;_gf<8;_gf++){var _gim=new Image();_gim.src=encodeURI('art/lop_cropped/gold_drop/SE/gold_drop_SE_315.0_'+_gf+'.png');lopGold.fr.push(_gim);}}   // coin drops
 // LoP scenery props (static SE billboards; anchor/display-height per prop from the crop tool)
 var LOPPROP={};
 if(ART_LOP){var _PD={column1:{feet:0.927,dh:200},bones1:{feet:0.773,dh:52},bones2:{feet:0.772,dh:40},bricks:{feet:0.848,dh:58},barrel:{feet:0.812,dh:84},crate:{feet:0.763,dh:80},rocks:{feet:0.931,dh:64}};
@@ -752,11 +754,12 @@ function drawHero(ctx,r){var p=r.project(P.x,P.y);if(!ART_LOP)P.anim.face((P.dir
   if(P.swing>0){ctx.strokeStyle='rgba(255,217,107,'+(P.swing/9*0.7)+')';ctx.lineWidth=3;ctx.save();ctx.translate(p.x,p.y-16);ctx.scale(1,0.5);ctx.beginPath();ctx.arc(0,0,26,0,6.28);ctx.stroke();ctx.restore();}
   if(!P.anim.draw(ctx,p.x,p.y,90*SPR))blit(sHero,p.x,p.y,P.face===-1);}
 function drawPortal(ctx,r){if(!portal)return;var pp=r.project(portal.x,portal.y),pr=16+Math.sin(portal.t*0.12)*4;ctx.strokeStyle='#ffcf5c';ctx.lineWidth=3;ctx.save();ctx.translate(pp.x,pp.y);ctx.scale(1,0.5);ctx.globalAlpha=0.85;ctx.beginPath();ctx.arc(0,0,pr,0,6.28);ctx.stroke();ctx.globalAlpha=0.35;ctx.beginPath();ctx.arc(0,0,pr+8,0,6.28);ctx.stroke();ctx.restore();ctx.globalAlpha=1;}
-function drawBezel(ctx,r){if(!bezel)return;var p=r.project(bezel.x,bezel.y),H=94*SPR;
+function drawBezel(ctx,r){if(!bezel)return;bezel.t=(bezel.t||0)+1;var p=r.project(bezel.x,bezel.y),H=94*SPR;
   ctx.save();ctx.translate(p.x,p.y);ctx.scale(1,0.5);ctx.strokeStyle='rgba(255,207,92,'+(0.42+0.18*Math.sin(bezel.t*0.09))+')';ctx.lineWidth=2;ctx.beginPath();ctx.arc(0,0,23,0,6.28);ctx.stroke();ctx.restore();
-  if(bezelCv){var w=H*bezelCv.width/bezelCv.height;ctx.imageSmoothingEnabled=true;ctx.drawImage(bezelCv,(p.x-w/2)|0,(p.y-H+8)|0,w,H);}
+  if(ART_LOP&&lopServant){var sim=lopServant.fr[(bezel.t/8|0)%lopServant.nfr];if(sim&&sim.complete&&sim.naturalWidth){var sdh=140,sdw=sdh*sim.naturalWidth/sim.naturalHeight;ctx.save();ctx.globalAlpha=0.3;ctx.fillStyle='#000';ctx.beginPath();ctx.ellipse(p.x,p.y,sdw*0.28,sdw*0.1,0,0,6.28);ctx.fill();ctx.restore();ctx.imageSmoothingEnabled=true;ctx.drawImage(sim,(p.x-sdw/2)|0,(p.y-sdh*lopServant.FEET)|0,sdw|0,sdh|0);}}
+  else if(bezelCv){var w=H*bezelCv.width/bezelCv.height;ctx.imageSmoothingEnabled=true;ctx.drawImage(bezelCv,(p.x-w/2)|0,(p.y-H+8)|0,w,H);}
   else{ctx.fillStyle='#6a2030';ctx.fillRect(p.x-9,p.y-38,18,40);ctx.fillStyle='#e8c060';ctx.fillRect(p.x-9,p.y-38,18,5);}
-  ctx.textAlign='center';ctx.fillStyle='#ffcf5c';ctx.font='600 12px Georgia,serif';ctx.fillText('Bezel',p.x,p.y-H+2);
+  ctx.textAlign='center';ctx.fillStyle='#ffcf5c';ctx.font='600 12px Georgia,serif';ctx.fillText('Bezel',p.x,p.y-(ART_LOP?108:H)+2);
   if(nearBezel){ctx.globalAlpha=0.82;ctx.fillStyle='#161009';ctx.fillRect(p.x-52,p.y+9,104,18);ctx.globalAlpha=1;ctx.fillStyle='#ffd96b';ctx.font='600 11px system-ui';ctx.fillText('Press F to trade',p.x,p.y+22);}}
 function drawBrazier(ctx,r,bz){var p=r.project(bz.x,bz.y);bz.t=(bz.t||0)+1;var fl=0.72+0.28*Math.sin(bz.t*0.22)+0.08*Math.sin(bz.t*0.5);
   if(ART_LOP&&lopBrazier){var im=lopBrazier.fr[(bz.t/5|0)%lopBrazier.nfr];
@@ -833,7 +836,8 @@ function draw(){
     if(d.type==='gilt'){
       var sw=(COINW[d.tier||'small']||30)*0.5;   // contact shadow scales with the pile, shrinks as it lifts off
       c.save();c.globalAlpha=Math.max(0.12,0.4-z*0.01);c.fillStyle='#000';c.beginPath();c.ellipse(p.x,p.y+1,sw*(1-z*0.006),sw*0.42*(1-z*0.006),0,0,6.28);c.fill();c.restore();
-      drawCoinPile(c,p.x,p.y,z,d.tier||'small',d.pop||0);
+      if(ART_LOP&&lopGold){var gi=lopGold.fr[((d.gt=(d.gt||0)+1)/6|0)%lopGold.nfr];if(gi&&gi.complete&&gi.naturalWidth){var gsc=(d.tier==='large'?1.5:d.tier==='medium'?1.2:0.95),gdh=42*gsc,gdw=gdh*gi.naturalWidth/gi.naturalHeight;c.imageSmoothingEnabled=true;c.drawImage(gi,(p.x-gdw/2)|0,(p.y-z-gdh*lopGold.FEET)|0,gdw|0,gdh|0);}}
+      else drawCoinPile(c,p.x,p.y,z,d.tier||'small',d.pop||0);
     }else{
       c.save();c.globalAlpha=Math.max(0.1,0.38-z*0.012);c.fillStyle='#000';c.beginPath();c.ellipse(p.x,p.y+3,Math.max(3,8-z*0.16),Math.max(1.5,4-z*0.08),0,0,6.28);c.fill();c.restore();
       blit(sDr,p.x,p.y-z,false);}}};})(Dr[i]));
