@@ -5,7 +5,7 @@
 // is small & centred with a baked drop-shadow, and the pack's own path/naming scheme.
 // Gated behind ?art=lop in index.html; the old Animation path is untouched when the flag is off.
 (function () {
-  var ROOT = 'art/lords_of_pain/playable character/';
+  var ROOT = 'art/lop_cropped/';   // cropped frames (tools/crop_lop_frames.py) — lean, padding removed
 
   // 16 LoP directions: name + baked angle (E=0deg, increasing COUNTER-CLOCKWISE). index = angle/22.5.
   var DIRS = [
@@ -26,11 +26,12 @@
     death:  { anim: 'special_death', nfr: 8, fps: 5, loop: false, hold: true }
   };
 
-  // --- calibration (measured from frame alpha bbox + tuned from Stage-4 screenshots) ---
-  // The figure is only ~16% of the 256 frame (the rest is transparent padding + baked shadow), so
-  // the frame must be drawn LARGE for the figure to read at the intended on-screen height.
-  var FIG = 0.20;       // frame draw size = H / FIG  (figure ends up ~0.8·H tall on screen)
-  var FEET = 0.52;      // figure's feet sit ~52% down the frame -> anchor that point on the ground
+  // --- calibration for the CROPPED warrior frames (from tools/crop_lop_frames.py _anchor.json) ---
+  // drawH = H · KH (figure ends up ~0.85·H tall); the feet point sits FEET down the cropped frame
+  // and is anchored on the ground; XOFF re-centres if the figure isn't centred in the crop.
+  var KH = 2.177;       // 90·SPR·KH ≈ figure height on screen
+  var FEET = 0.696;     // ground-contact fraction down the cropped frame
+  var XOFF = 0.0;       // horizontal figure offset (fraction of cropped width); 0 = centred
   var DIR_OFFSET = 0;   // degrees added to the screen movement angle before snapping to a LoP dir
 
   function LopAnim(charName) {
@@ -93,15 +94,19 @@
     }
   };
 
-  // H = target FIGURE height in px (same contract as Animation.draw). Frame is drawn at H/FIG and
-  // anchored so the figure's feet (FEET down the frame) land on the ground point (x,y).
+  // H = the size knob (same contract as Animation.draw: 90·SPR). The cropped frame is drawn at
+  // height H·KH (aspect-preserved) and anchored so the figure's feet (FEET down the frame) land on
+  // the ground point (x,y). A small procedural contact-shadow ellipse replaces the cropped-out
+  // baked shadow so the figure reads as grounded regardless of facing.
   P.draw = function (ctx, x, y, H) {
     var m = MAP[this.mode] || MAP.idle, dirName = DIRS[this.dir].n;
     var im = this._img(m.anim, dirName, (this.frame | 0) % m.nfr);
     if (!im || !im.complete || !im.naturalWidth) return false;
-    var sz = (H / FIG) * this.scale, oa = ctx.globalAlpha;
+    var drawH = H * KH * this.scale, drawW = drawH * im.naturalWidth / im.naturalHeight, oa = ctx.globalAlpha;
+    ctx.save(); ctx.globalAlpha = oa * 0.28 * this.alpha; ctx.fillStyle = '#000';      // contact shadow
+    ctx.beginPath(); ctx.ellipse(x, y, drawW * 0.17, drawW * 0.065, 0, 0, 6.28); ctx.fill(); ctx.restore();
     ctx.imageSmoothingEnabled = true; if (this.alpha < 1) ctx.globalAlpha = oa * this.alpha;
-    ctx.drawImage(im, (x - sz / 2) | 0, (y - sz * FEET + this.yoff) | 0, sz | 0, sz | 0);
+    ctx.drawImage(im, (x - drawW / 2 + XOFF * drawW) | 0, (y - drawH * FEET + this.yoff) | 0, drawW | 0, drawH | 0);
     ctx.globalAlpha = oa; return true;
   };
 

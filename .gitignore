@@ -26,3 +26,5 @@ build/
 
 # Third-party asset pack — license forbids redistribution, never commit (evaluation only)
 client/art/lords_of_pain/
+# Cropped frames are DERIVED from that pack -> same redistribution restriction, never commit
+client/art/lop_cropped/
