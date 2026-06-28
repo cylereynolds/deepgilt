@@ -357,7 +357,14 @@ function curFloorTex(){
   return (z&&z.ready)?z:floorTex;   // Dungeon (or not-yet-loaded) → dungeon stone
 }
 var townGround=DGC.Assets.texture('art/scene/scenario_ground2.png',function(){if(map.cells&&depth===0)rebuildGround();});  // single cohesive hub ground: pixelated + iso-skewed, no tiling
-function rebuildGround(){if(depth===0){if(autotileTex&&autotileTex.ready){mr.buildGroundAuto(autotileTex,true,townTileCell);}else{var g=ENVTEX.t_grass;mr.buildGround(g,g&&g.ready,FPATCH,townZoneTex,townZoneClass);}return;}var ftex=curFloorTex();mr.buildGround(ftex,ftex.ready,FPATCH);}
+// EVAL switch (?art=lop): swap ALL ground for the Lords of Pain pixel-art stone (gitignored pack). Reversible — omit the param for the AI ground. See maprenderer.buildGroundLOP.
+var ART_LOP=location.search.indexOf('art=lop')>=0;
+var lopStone=ART_LOP?DGC.Assets.texture('art/lords_of_pain/environment/ground_stone1.png',function(){if(map.cells)rebuildGround();}):null;
+var lopOv1=ART_LOP?DGC.Assets.texture('art/lords_of_pain/environment/ground_variation1.png',function(){if(map.cells)rebuildGround();}):null;
+var lopOv2=ART_LOP?DGC.Assets.texture('art/lords_of_pain/environment/ground_variation2.png',function(){if(map.cells)rebuildGround();}):null;
+function rebuildGround(){
+  if(ART_LOP){mr.buildGroundLOP(lopStone,lopStone&&lopStone.ready,[lopOv1,lopOv2]);return;}   // LoP ground for ALL depths during eval
+  if(depth===0){if(autotileTex&&autotileTex.ready){mr.buildGroundAuto(autotileTex,true,townTileCell);}else{var g=ENVTEX.t_grass;mr.buildGround(g,g&&g.ready,FPATCH,townZoneTex,townZoneClass);}return;}var ftex=curFloorTex();mr.buildGround(ftex,ftex.ready,FPATCH);}
 var orbTex=DGC.Assets.texture('art/ui/orb.png');   // painted glass-orb overlay (gilded rim + glass shine), screen-blended over the liquid fill
 // painted HUD orb: dark well + colored liquid filled bottom-up to frac, then the gilded glass sphere screen-blended on top (its black bg vanishes)
 function drawOrb(cx,cy,r,frac,fill,empty){

@@ -23,3 +23,6 @@ build/
 # OS / editor cruft
 .DS_Store
 *.log
+
+# Third-party asset pack — license forbids redistribution, never commit (evaluation only)
+client/art/lords_of_pain/

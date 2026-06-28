@@ -159,6 +159,40 @@
     this.ground = cv;
   };
 
+  // LORDS-OF-PAIN GROUND (evaluation path, ?art=lop): the pack's ground is a seamless 256x256
+  // square stone MATERIAL (opaque) + transparent grunge OVERLAYS — not pre-projected diamonds.
+  // So we tile the stone as a canvas-aligned repeating pattern (continuous across cells -> no
+  // per-tile repeat, no seams) clipped to each floor diamond, then scatter the overlays on top
+  // for grime variation. NO color grade — the art is already dark/grimy (show native look).
+  P.buildGroundLOP = function (stoneImg, ready, overlays) {
+    var iso = this.iso, map = this.map;
+    var cv = document.createElement('canvas'); cv.width = iso.GCW; cv.height = iso.GCH;
+    var g = cv.getContext('2d'); g.imageSmoothingEnabled = true;
+    g.fillStyle = '#0b0a0d'; g.fillRect(0, 0, cv.width, cv.height);                 // void backdrop
+    if (ready && stoneImg && stoneImg.complete && stoneImg.naturalWidth) {
+      var pat = g.createPattern(stoneImg, 'repeat');                                 // canvas-aligned -> seamless across diamonds
+      for (var gy = 0; gy < map.GH; gy++) for (var gx = 0; gx < map.GW; gx++) {
+        if (map.cells[gy][gx] !== 0 && !map.wallVisible(gx, gy)) continue;
+        var T = iso.isoC(gx, gy), R = iso.isoC(gx + 1, gy), B = iso.isoC(gx + 1, gy + 1), L = iso.isoC(gx, gy + 1);
+        g.save(); g.beginPath(); g.moveTo(T.x, T.y); g.lineTo(R.x, R.y); g.lineTo(B.x, B.y); g.lineTo(L.x, L.y); g.closePath(); g.clip();
+        g.fillStyle = pat; g.fillRect(L.x, T.y, R.x - L.x, B.y - T.y);
+        g.restore();
+      }
+      if (overlays && overlays.length) {                                            // scatter transparent grunge decals (native alpha)
+        var seed = 20240617; function rnd() { seed = (seed * 1103515245 + 12345) & 0x7fffffff; return seed / 0x7fffffff; }
+        var n = Math.max(6, Math.round(map.GW * map.GH / 26));
+        for (var s = 0; s < n; s++) {
+          var ov = overlays[(rnd() * overlays.length) | 0]; if (!ov || !ov.complete || !ov.naturalWidth) continue;
+          var cgx = rnd() * map.GW, cgy = rnd() * map.GH;
+          if (map.cells[cgy | 0] && map.cells[cgy | 0][cgx | 0] !== 0) continue;     // only over floor
+          var p = iso.isoC(cgx, cgy), sz = 60 + rnd() * 110;
+          g.save(); g.globalAlpha = 0.45 + rnd() * 0.4; g.drawImage(ov, p.x - sz / 2, p.y - sz / 2, sz, sz); g.restore();
+        }
+      }
+    }
+    this.ground = cv;
+  };
+
   // world px -> screen px (valid after camera is set in render())
   P.project = function (wx, wy) { var p = this.iso.w2i(wx, wy); return { x: p.x - this.camX, y: p.y - this.camY }; };
 

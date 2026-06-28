@@ -1,0 +1,79 @@
+<!doctype html><html><head><meta charset="utf-8"><title>Lords of Pain — ground test (real renderer, TW=64/TH=32)</title>
+<style>
+  html,body{margin:0;background:#0b0a0d;color:#cdbfa6;font:13px system-ui;overflow:hidden}
+  #c{display:block;margin:0 auto;background:#0b0a0d;image-rendering:auto}
+  #hud{position:fixed;left:8px;top:6px;opacity:.8;font-size:12px;pointer-events:none;text-shadow:0 1px 2px #000}
+</style></head><body>
+<div id="hud">Lords of Pain ground · real renderer · TW=64/TH=32 · native colors (no grade)</div>
+<canvas id="c" width="1000" height="680"></canvas>
+<!-- the ACTUAL engine modules (same files index.html loads) -->
+<script src="dg/common/iso.js"></script>
+<script src="dg/core/mapengine.js"></script>
+<script src="dg/core/maprenderer.js"></script>
+<script>
+(function(){
+  var DGC=window.DGC, cv=document.getElementById('c'), ctx=cv.getContext('2d');
+  var CW=cv.width, CH=cv.height;
+  var GW=22, GH=22, TS=32;
+
+  // --- open arena: floor interior + 1-cell wall ring (gives wall cubes for context) ---
+  var map=new DGC.MapEngine(GW,GH,TS,Math.random), c=[];
+  for(var y=0;y<GH;y++){c[y]=[];for(var x=0;x<GW;x++)c[y][x]=(x===0||y===0||x===GW-1||y===GH-1)?1:0;}
+  map.cells=c; map.rooms=[{x:1,y:1,w:GW-2,h:GH-2,cx:GW>>1,cy:GH>>1}]; map.exitRoom=map.rooms[0]; map.specials=[];
+
+  var iso=DGC.Iso(GW,GH,TS), mr=new DGC.MapRenderer(map,iso);
+
+  // --- load LoP assets ---
+  var ROOT='art/lords_of_pain/';
+  function img(p){var i=new Image();i.src=encodeURI(ROOT+p);return i;}
+  var stone=img('environment/ground_stone1.png');
+  var ov1=img('environment/ground_variation1.png'), ov2=img('environment/ground_variation2.png');
+  var PROP={
+    rocks:img('prop/rocks/SE/rocks_SE_315.0_0.png'),
+    bones1:img('prop/bones1/SE/bones1_SE_315.0_0.png'),
+    bones2:img('prop/bones2/SE/bones2_SE_315.0_0.png'),
+    mushrooms:img('prop/mushrooms/SE/mushrooms_SE_315.0_0.png'),
+    column1:img('prop/column1/SE/column1_SE_315.0_0.png'),
+    barrel:img('prop/barrel/SE/barrel_SE_315.0_0.png'),
+    crate:img('prop/crate/SE/crate_SE_315.0_0.png'),
+    brazier_lit:img('prop/brazier_lit/SE/brazier_lit_SE_315.0_0.png')
+  };
+  var hero=img('playable character/warrior/warrior_default_idle/SE/warrior_default_idle_SE_315.0_0.png');
+
+  // scene placement in GRID coords (gx,gy); world = (g+0.5)*TS
+  var SCENE=[
+    {t:'column1',gx:7,gy:7,sz:300},{t:'column1',gx:15,gy:7,sz:300},{t:'column1',gx:7,gy:15,sz:300},{t:'column1',gx:15,gy:15,sz:300},
+    {t:'brazier_lit',gx:11,gy:7,sz:280},
+    {t:'crate',gx:8,gy:9,sz:250},{t:'barrel',gx:9,gy:9,sz:250},{t:'barrel',gx:14,gy:12,sz:250},
+    {t:'rocks',gx:8,gy:13,sz:240},{t:'rocks',gx:13,gy:9,sz:240},
+    {t:'bones1',gx:9,gy:14,sz:240},{t:'bones2',gx:13,gy:13,sz:240},
+    {t:'mushrooms',gx:8,gy:11,sz:240},{t:'mushrooms',gx:14,gy:9,sz:240}
+  ];
+  var HERO={gx:11,gy:11};
+  function W(g){return (g+0.5)*TS;}
+  // draw a 256 LoP frame anchored so the figure's feet/base sit on the ground point p.
+  // figure sits ~ centre-x, ~0.60 down the frame (feet); baked shadow is part of the frame.
+  function blitLOP(c2,frame,px,py,sz){ if(!frame.complete||!frame.naturalWidth)return;
+    c2.imageSmoothingEnabled=true; c2.drawImage(frame, (px-sz/2)|0, (py-sz*0.60)|0, sz|0, sz|0); }
+
+  function drawables(){
+    var D=[];
+    SCENE.forEach(function(o){var wx=W(o.gx),wy=W(o.gy);
+      D.push({k:(wx+wy)/TS, draw:function(cx2,r){var p=r.project(wx,wy); blitLOP(cx2,PROP[o.t]||PROP.rocks,p.x,p.y,o.sz||240);}});});
+    var hx=W(HERO.gx),hy=W(HERO.gy);
+    D.push({k:(hx+hy)/TS, draw:function(cx2,r){var p=r.project(hx,hy); blitLOP(cx2,hero,p.x,p.y,256);}});
+    return D;
+  }
+
+  function rebuild(){ mr.buildGroundLOP(stone, stone.complete&&stone.naturalWidth>0, [ov1,ov2]); }
+  function draw(){ if(!mr.ground) rebuild(); ctx.clearRect(0,0,CW,CH);
+    mr.render(ctx,CW,CH, W(HERO.gx), W(HERO.gy), drawables()); }
+
+  // rebuild ground whenever an asset finishes; keep drawing (setInterval survives unfocused tab)
+  [stone,ov1,ov2].forEach(function(im){im.onload=function(){mr.ground=null;draw();};});
+  Object.keys(PROP).forEach(function(k){PROP[k].onload=draw;}); hero.onload=draw;
+  draw(); setInterval(draw,250);
+  window.__draw=draw;
+})();
+</script>
+</body></html>
