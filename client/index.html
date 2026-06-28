@@ -361,6 +361,9 @@ function curFloorTex(){
 var townGround=DGC.Assets.texture('art/scene/scenario_ground2.png',function(){if(map.cells&&depth===0)rebuildGround();});  // single cohesive hub ground: pixelated + iso-skewed, no tiling
 // EVAL switch (?art=lop): swap ALL ground for the Lords of Pain pixel-art stone (gitignored pack). Reversible — omit the param for the AI ground. See maprenderer.buildGroundLOP.
 var ART_LOP=location.search.indexOf('art=lop')>=0;
+// LoP sprite mappings (only active under ART_LOP). Unmapped classes/creatures keep their old art.
+var LOP_CLASS={reaver:'warrior',warden:'knight',stalker:'fighter'};   // melee classes -> LoP players; casters pyre/bonewright/feral have NO LoP sprite
+var LOP_MON={crypt_sentinel:'skeleton',crypt_bowman:'skeleton',flesh_scavenger:'slime',maiden_of_anguish:'demonlord'};  // undead->skeleton, gooey rot->slime, act-boss demon->demonlord
 var lopStone=ART_LOP?DGC.Assets.texture('art/lords_of_pain/environment/ground_stone1.png',function(){if(map.cells)rebuildGround();}):null;
 var lopOv1=ART_LOP?DGC.Assets.texture('art/lords_of_pain/environment/ground_variation1.png',function(){if(map.cells)rebuildGround();}):null;
 var lopOv2=ART_LOP?DGC.Assets.texture('art/lords_of_pain/environment/ground_variation2.png',function(){if(map.cells)rebuildGround();}):null;
@@ -446,7 +449,9 @@ function makeMon(mt,x,y,d){
   e.hp=e.mon.hp;e.maxhp=e.mon.hp;e.acd=Math.floor(rr(0,18));
   e.champ=(mt.tier==='Champion'||mt.tier==='Elite');e.boss=(mt.tier==='Boss');
   e.spd=MONSPD[mt.speed];if(e.spd===undefined)e.spd=1.0;
-  e.spr=mt.slug;e.face=1;e.fl=0;e.deadT=0;e.atk=0;e.awake=false;e.stun=0;e.bleed=null;if(BAKED_MOBS[e.spr])e.anim=mkAnim(e.spr);return e;  // stun MUST init to 0 — the move/attack gate is `en.stun<=0`, and `undefined<=0` is false (froze awake mobs until first staggered)
+  e.spr=mt.slug;e.face=1;e.fl=0;e.deadT=0;e.atk=0;e.awake=false;e.stun=0;e.bleed=null;
+  if(ART_LOP&&DGC.LopAnim&&LOP_MON[e.spr])e.anim=new DGC.LopAnim(LOP_MON[e.spr]);else if(BAKED_MOBS[e.spr])e.anim=mkAnim(e.spr);
+  return e;  // stun MUST init to 0 — the move/attack gate is `en.stun<=0`, and `undefined<=0` is false (froze awake mobs until first staggered)
 }
 // the level's monster roster: standard pool sized by depth + synergy reinforcements + a rare SuperUnique
 // --- ACT 1: the 14 themed zones (index 0 = town), in progression order ending at the Maiden of Anguish ---
@@ -559,7 +564,7 @@ function spawn(d){
   });
   banner=180;bannerT=zone.name+' — Area Level '+zone.aLvl+(isFinale?' · slay the Maiden of Anguish':' · find the rift');
 }
-function makeHero(){var h=new DGC.Hero(CLASSID,HATTRS);h.anim=(ART_LOP&&DGC.LopAnim)?new DGC.LopAnim('warrior'):mkAnim(BAKED_CLASSES[CLASSID]?CLASSID:null);h.equip.weapon=mkItem('weapon',30,'Rare',{dmg_min:18,dmg_max:41},'Reaping Scythe');h.equip.weapon.iLvl=1;h.equip.weapon.wsm=0;h.equip.weapon.maxDur=40;h.equip.weapon.dur=40;h.recompute();h.buildSkills(SKILLDATA);h.hp=h.mhp;h.charge=h.mcharge;h.staminaBuff=0;h._running=false;h.runIntent=false;h._winded=false;h._shift=false;return h;}  // mstam/stam now set by recompute (Vigor-scaled)
+function makeHero(){var h=new DGC.Hero(CLASSID,HATTRS);h.anim=(ART_LOP&&DGC.LopAnim&&LOP_CLASS[CLASSID])?new DGC.LopAnim(LOP_CLASS[CLASSID]):mkAnim(BAKED_CLASSES[CLASSID]?CLASSID:null);h.equip.weapon=mkItem('weapon',30,'Rare',{dmg_min:18,dmg_max:41},'Reaping Scythe');h.equip.weapon.iLvl=1;h.equip.weapon.wsm=0;h.equip.weapon.maxDur=40;h.equip.weapon.dur=40;h.recompute();h.buildSkills(SKILLDATA);h.hp=h.mhp;h.charge=h.mcharge;h.staminaBuff=0;h._running=false;h.runIntent=false;h._winded=false;h._shift=false;return h;}  // mstam/stam now set by recompute (Vigor-scaled)
 function reset(){
   P=makeHero();P.x=CW/2;P.y=CH/2;P.tx=CW/2;P.ty=CH/2;
   Se=[];Tx=[];CASTS=[];Decals=[];gilt=100000;dead=false;won=false;returnDepth=1;maxZone=1;spawn(0);   // start with 1 Gold (raw Bronze) for testing the economy
@@ -636,7 +641,7 @@ function step(){
         // A* toward the player, recomputed periodically — routes around walls instead of beelining
         if((en.pcd=(en.pcd||0)-1)<=0||!en.path){en.path=DGC.Path.find(map,en.x,en.y,P.x,P.y);en.pi=0;en.pcd=24;}
         var wtx,wty;if(en.path&&en.pi<en.path.length){wtx=en.path[en.pi].x;wty=en.path[en.pi].y;}else{wtx=P.x;wty=P.y;}
-        var wmx=wtx-en.x,wmy=wty-en.y,wmd=Math.hypot(wmx,wmy);en.dir=dirOf(wmx,wmy);en.face=wmx<0?-1:1;
+        var wmx=wtx-en.x,wmy=wty-en.y,wmd=Math.hypot(wmx,wmy);en.dir=dirOf(wmx,wmy);en.face=wmx<0?-1:1;if(ART_LOP&&en.anim&&en.anim.faceVec)en.anim.faceVec(wmx,wmy);
         if(wmd>4){en._mv=true;map.tryMove(en,en.x+wmx/wmd*en.spd,en.y+wmy/wmd*en.spd);}else if(en.path&&en.pi<en.path.length)en.pi++;
       } else en.face=ex<0?-1:1;
     }
@@ -692,7 +697,7 @@ function step(){
 }
 function drawMon(ctx,r,en){
   var p=r.project(en.x,en.y),_HH=(en.boss?156:en.champ?114:84)*SPR;
-  if(en.anim){en.anim.face((en.dir+ISO_DIR)&7);en.anim.alpha=en.dead?Math.max(0,1-en.deadT/42):(en.fl>0?0.5:1);en.anim.yoff=en.dead?en.deadT*0.8:0;
+  if(en.anim){if(!(ART_LOP&&en.anim.faceVec))en.anim.face((en.dir+ISO_DIR)&7);en.anim.alpha=en.dead?Math.max(0,1-en.deadT/42):(en.fl>0?0.5:1);en.anim.yoff=en.dead?en.deadT*0.8:0;
     if(en.anim.draw(ctx,p.x,p.y,_HH)){if(!en.dead){if(en.boss){ctx.textAlign='center';ctx.fillStyle=en.mon.arch==='SuperUnique'?'#ff9a3c':'#e0726b';ctx.font='600 12px Georgia,serif';ctx.fillText(en.mon.name,p.x,(p.y-_HH+2)|0);}if(en.hp<en.maxhp&&(en.champ||en.boss)){var _bw=en.boss?72:42,_hf=Math.max(0,en.hp/en.maxhp);ctx.fillStyle='rgba(0,0,0,.6)';ctx.fillRect((p.x-_bw/2)|0,(p.y-_HH-4)|0,_bw,4);ctx.fillStyle=en.boss?'#e0484a':'#d8884a';ctx.fillRect((p.x-_bw/2)|0,(p.y-_HH-4)|0,(_bw*_hf)|0,4);}}return;}}
   var tex=MONTEX[en.spr];
   if(!tex){if(en.fl>0&&!en.dead)ctx.globalAlpha=0.6;blit(sHusk,p.x,p.y,en.face===-1);ctx.globalAlpha=1;return;}  // husk fallback until the sprite loads
