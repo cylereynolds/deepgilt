@@ -363,7 +363,7 @@ var townGround=DGC.Assets.texture('art/scene/scenario_ground2.png',function(){if
 var ART_LOP=location.search.indexOf('art=lop')>=0;
 // LoP sprite mappings (only active under ART_LOP). Unmapped classes/creatures keep their old art.
 var LOP_CLASS={reaver:'warrior',warden:'knight',stalker:'fighter'};   // melee classes -> LoP players; casters pyre/bonewright/feral have NO LoP sprite
-var LOP_MON={crypt_sentinel:'skeleton',crypt_bowman:'skeleton',flesh_scavenger:'slime',maiden_of_anguish:'demonlord'};  // undead->skeleton, gooey rot->slime, act-boss demon->demonlord
+var LOP_MON={crypt_sentinel:'skeleton',crypt_bowman:'skeleton',flesh_scavenger:'slime',maiden_of_anguish:'demonlord',gravelight_horror:'gravelight'};  // undead->skeleton, gooey rot->slime, act-boss demon->demonlord, caster->Blender gravelight (placeholder)
 var lopStone=ART_LOP?DGC.Assets.texture('art/lords_of_pain/environment/ground_stone1.png',function(){if(map.cells)rebuildGround();}):null;
 var lopOv1=ART_LOP?DGC.Assets.texture('art/lords_of_pain/environment/ground_variation1.png',function(){if(map.cells)rebuildGround();}):null;
 var lopOv2=ART_LOP?DGC.Assets.texture('art/lords_of_pain/environment/ground_variation2.png',function(){if(map.cells)rebuildGround();}):null;

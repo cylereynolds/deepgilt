@@ -28,3 +28,5 @@ build/
 client/art/lords_of_pain/
 # Cropped frames are DERIVED from that pack -> same redistribution restriction, never commit
 client/art/lop_cropped/
+# Blender-generated placeholder frames — ORIGINAL but regenerable from tools/blender_creature.py (keep repo lean)
+client/art/blender_gen/

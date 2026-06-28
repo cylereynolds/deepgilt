@@ -15,8 +15,11 @@ Figure bbox excludes the soft baked shadow via an alpha threshold (same method u
 the warrior). Output goes to a NEW location (client/art/lop_cropped/, gitignored — it's derived
 from the redistribution-restricted pack). Prints the per-character anchor numbers for LopAnim.
 
-Usage:  python3 tools/crop_lop_frames.py <character>   e.g. warrior | knight | skeleton | demonlord
-        (character folder is searched under playable character / enemy / boss / none-playable character)
+Usage:  python3 tools/crop_lop_frames.py <character> [src_dir]
+        e.g.  python3 tools/crop_lop_frames.py warrior
+              python3 tools/crop_lop_frames.py gravelight client/art/blender_gen/gravelight
+        With no src_dir the char folder is searched under the LoP pack (playable character /
+        enemy / boss / none-playable character). Pass src_dir to crop Blender-generated frames.
 """
 import os, sys, glob, json
 from PIL import Image
@@ -44,9 +47,12 @@ def main():
     if len(sys.argv) < 2:
         print("usage: crop_lop_frames.py <character>"); sys.exit(1)
     char = sys.argv[1]
-    cdir, cat = find_char_dir(char)
-    if not cdir:
-        print("character not found:", char); sys.exit(1)
+    if len(sys.argv) >= 3:                                   # explicit source dir (e.g. Blender-generated)
+        cdir = os.path.abspath(sys.argv[2]); cat = "generated"
+        if not os.path.isdir(cdir): print("src dir not found:", cdir); sys.exit(1)
+    else:
+        cdir, cat = find_char_dir(char)
+        if not cdir: print("character not found:", char); sys.exit(1)
     frames = sorted(glob.glob(os.path.join(cdir, "*", "*", "*.png")))
     if not frames:
         print("no frames under", cdir); sys.exit(1)

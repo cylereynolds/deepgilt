@@ -48,6 +48,13 @@
     // (special_intro / special_laugh exist but aren't wired to a combat mode — boss-entrance use later.)
   };
 
+  var GRAVELIGHT = {                                     // PLACEHOLDER: Blender-generated floating orb-wisp (tools/blender_creature.py)
+    walk:   { lop: 'default_walk',   nfr: 6, fps: 4, loop: 1 },
+    idle:   { lop: 'default_idle',   nfr: 1, fps: 6, loop: 1 },
+    attack: { lop: 'default_attack', nfr: 4, fps: 3 },
+    cast:   { lop: 'default_attack', nfr: 4, fps: 3 }     // hit/death undefined -> walk + alpha fade (no death frames rendered)
+  };
+
   // anchors from tools/crop_lop_frames.py _anchor.json (cropped-frame values)
   var CHARS = {
     warrior:   { modes: humanoid('armed'),   anchor: { KH: 2.177, FEET: 0.696, XOFF: 0 } },
@@ -55,7 +62,8 @@
     fighter:   { modes: humanoid('armed'),   anchor: { KH: 2.135, FEET: 0.683, XOFF: 0 } },
     skeleton:  { modes: humanoid('default'), anchor: { KH: 2.040, FEET: 0.753, XOFF: 0 } },
     slime:     { modes: SLIME,               anchor: { KH: 1.747, FEET: 0.752, XOFF: 0 } },
-    demonlord: { modes: DEMON,               anchor: { KH: 1.753, FEET: 0.739, XOFF: 0 } }
+    demonlord: { modes: DEMON,               anchor: { KH: 1.753, FEET: 0.739, XOFF: 0 } },
+    gravelight: { modes: GRAVELIGHT,         anchor: { KH: 1.108, FEET: 0.952, XOFF: 0 } }   // Blender placeholder
   };
 
   function LopAnim(charName) {
