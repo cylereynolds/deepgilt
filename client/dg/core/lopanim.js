@@ -15,6 +15,7 @@
     { n: 'S', a: 270 }, { n: 'SSE', a: 292.5 }, { n: 'SE', a: 315 }, { n: 'SEE', a: 337.5 }
   ];
   var DIR_OFFSET = 0;   // degrees added to the screen movement angle before snapping to a LoP dir
+  var CHAR_SCALE = 0.62; // global down-scale for ALL LoP characters so they read smaller than walls/braziers (D2 proportion)
 
   // ---- per-character MODE TABLE -------------------------------------------------------------
   // Maps DeepGilt game modes (walk/idle/attack/cast/hit/death) -> a LoP anim folder suffix +
@@ -141,7 +142,7 @@
     var def = this._cur(), dirName = DIRS[this.dir].n;
     var im = this._img(def.lop, dirName, (this.frame | 0) % def.nfr);
     if (!im || !im.complete || !im.naturalWidth) return false;
-    var an = this.cfg.anchor, drawH = H * an.KH * this.scale, drawW = drawH * im.naturalWidth / im.naturalHeight, oa = ctx.globalAlpha;
+    var an = this.cfg.anchor, drawH = H * an.KH * CHAR_SCALE * this.scale, drawW = drawH * im.naturalWidth / im.naturalHeight, oa = ctx.globalAlpha;
     ctx.save(); ctx.globalAlpha = oa * 0.28 * this.alpha; ctx.fillStyle = '#000';
     ctx.beginPath(); ctx.ellipse(x, y, drawW * 0.17, drawW * 0.065, 0, 0, 6.28); ctx.fill(); ctx.restore();
     ctx.imageSmoothingEnabled = true; if (this.alpha < 1) ctx.globalAlpha = oa * this.alpha;
