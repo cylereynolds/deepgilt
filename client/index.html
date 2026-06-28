@@ -1123,7 +1123,8 @@ var TAGLINE={
 var SEL_ORDER=['reaver','warden','stalker','pyre','bonewright','feral'];  // martial → arcane
 function buildSelect(){
   var wrap=document.getElementById('cards'),enter=document.getElementById('enter'),chosen=null;
-  SEL_ORDER.forEach(function(cid){
+  var order=ART_LOP?['reaver','warden','stalker']:SEL_ORDER;   // full-LoP: only the 3 classes with their own LoP body (warrior/knight/fighter)
+  order.forEach(function(cid){
     var c=window.DGART&&DGART.classes[cid];if(!c)return;
     var card=el('div','card');card.style.setProperty('--ac',c.A);
     var img=new Image();img.className='port';img.src='art/sprites/'+cid+'/walk/dir1_00.png';card.appendChild(img);
