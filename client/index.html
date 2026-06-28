@@ -377,6 +377,13 @@ if(ART_LOP){mr._lop=true;mr._stoneImg=lopStone;FOVRAD=9.5;}   // stone-texture w
 // LoP placed-light prop: animated brazier flame (cropped frames, SE view; anchor from _anchor.json)
 var lopBrazier=null;
 if(ART_LOP){lopBrazier={fr:[],nfr:8,FEET:0.842};for(var _bf=0;_bf<8;_bf++){var _bim=new Image();_bim.src=encodeURI('art/lop_cropped/brazier_lit/SE/brazier_lit_SE_315.0_'+_bf+'.png');lopBrazier.fr.push(_bim);}}
+// LoP scenery props (static SE billboards; anchor/display-height per prop from the crop tool)
+var LOPPROP={};
+if(ART_LOP){var _PD={column1:{feet:0.927,dh:200},bones1:{feet:0.773,dh:52},bones2:{feet:0.772,dh:40},bricks:{feet:0.848,dh:58},barrel:{feet:0.812,dh:84},crate:{feet:0.763,dh:80},rocks:{feet:0.931,dh:64}};
+  for(var _pn in _PD){(function(nm,d){var im=new Image();im.src=encodeURI('art/lop_cropped/'+nm+'/SE/'+nm+'_SE_315.0_0.png');LOPPROP[nm]={im:im,feet:d.feet,dh:d.dh};})(_pn,_PD[_pn]);}}
+function drawLopProp(ctx,r,pr){var d=LOPPROP[pr.name];if(!d||!d.im.complete||!d.im.naturalWidth)return;var p=r.project(pr.x,pr.y),dh=d.dh,dw=dh*d.im.naturalWidth/d.im.naturalHeight;
+  ctx.save();ctx.globalAlpha=0.30;ctx.fillStyle='#000';ctx.beginPath();ctx.ellipse(p.x,p.y,dw*0.32,dw*0.12,0,0,6.28);ctx.fill();ctx.restore();   // contact shadow
+  ctx.imageSmoothingEnabled=true;ctx.drawImage(d.im,(p.x-dw/2)|0,(p.y-dh*d.feet)|0,dw|0,dh|0);}
 function rebuildGround(){
   if(ART_LOP){mr.buildGroundLOP(lopStone,lopStone&&lopStone.ready,[lopOv1,lopOv2]);return;}   // LoP ground for ALL depths during eval
   if(depth===0){if(autotileTex&&autotileTex.ready){mr.buildGroundAuto(autotileTex,true,townTileCell);}else{var g=ENVTEX.t_grass;mr.buildGround(g,g&&g.ready,FPATCH,townZoneTex,townZoneClass);}return;}var ftex=curFloorTex();mr.buildGround(ftex,ftex.ready,FPATCH);}
@@ -407,7 +414,7 @@ function drawCoinPile(c,x,yGround,z,tier,pop){
 
 var AFFIXES,HBASE,HATTRS,SKILLDATA,CASTS=[],NOVAS=[];  // hero state lives on DGC.Hero P; NOVAS = boss poison-nova rings
 var P,En,Se,Dr,Tx,Decals,gilt,depth,portal,entranceCell,dead,banner,bannerT,won,maxZone;
-var bezel=null,returnDepth=1,nearBezel=false,bezelCv=null,braziers=[],structs=[],stones=[],grassD=[];   // ...town props: structures + scattered ground stones + walk-through grass tufts
+var bezel=null,returnDepth=1,nearBezel=false,bezelCv=null,braziers=[],structs=[],stones=[],grassD=[],lopProps=[];   // ...town props: structures + scattered ground stones + walk-through grass tufts; lopProps = LoP scenery (columns/bones/debris)
 // chroma-key Bezel's green-screen render to a transparent canvas (drawn as a town billboard)
 function keyGreen(img){var c=document.createElement('canvas');c.width=img.width;c.height=img.height;var x=c.getContext('2d');x.drawImage(img,0,0);try{var d=x.getImageData(0,0,c.width,c.height),p=d.data;for(var i=0;i<p.length;i+=4){var r=p[i],g=p[i+1],b=p[i+2];if(g>85&&g>r*1.3&&g>b*1.3)p[i+3]=0;}x.putImageData(d,0,0);}catch(e){}return c;}
 (function(){var bi=new Image();bi.onload=function(){bezelCv=keyGreen(bi);};bi.src='art/ui/bezel.png';})();
@@ -554,6 +561,7 @@ function spawn(d){
     for(var ty=0;ty<GH;ty++)for(var tx=0;tx<GW;tx++)SEEN[ty][tx]=true;   // whole town revealed on the minimap
     bezel={x:30*TS,y:23*TS,t:0};portal=null;
     braziers=ART_LOP?[{x:26*TS,y:20*TS,t:0},{x:34*TS,y:21*TS,t:24},{x:24*TS,y:27*TS,t:48},{x:36*TS,y:27*TS,t:12},{x:30*TS,y:31*TS,t:36}]:[];   // LoP: light the camp
+    lopProps=ART_LOP?[{name:'column1',x:25*TS,y:19*TS},{name:'column1',x:35*TS,y:19*TS},{name:'crate',x:27*TS,y:28*TS},{name:'barrel',x:33*TS,y:28*TS},{name:'bones1',x:29*TS,y:32*TS},{name:'bricks',x:37*TS,y:25*TS}]:[];   // LoP camp scenery
     for(var rvy=25;rvy<40;rvy++)for(var rvx=0;rvx<10;rvx++)map.block(rvx,rvy);   // TILE_RIVER (X0-10,Y25-40) blocks movement
     var FP=[[28,20,2,2,'campfire'],[30,19,2,1,'chest'],[15,10,3,3,'forge'],[15,30,4,2,'wagon'],[18,28,4,2,'wagon'],[12,28,3,3,'cargo'],[45,30,4,4,'tent'],[40,5,2,2,'sentry'],[48,15,2,2,'sentry']];   // blueprint structures [gx,gy,w,h,kind]
     structs=[];FP.forEach(function(f){for(var yy=f[1];yy<f[1]+f[3];yy++)for(var xx=f[0];xx<f[0]+f[2];xx++)map.block(xx,yy);structs.push({kind:f[4],x:(f[0]+f[2]/2)*TS,y:(f[1]+f[3])*TS,t:0});});
@@ -563,11 +571,16 @@ function spawn(d){
     banner=180;bannerT='The Gilded Hold — trade with Bezel (F), then open a Portal (P) to descend';return;
   }
   var zone=ACT1[d]||ACT1[ACT1_LAST],isFinale=(zone.boss===MAIDEN);
-  bezel=null;braziers=[];structs=[];stones=[];grassD=[];
+  bezel=null;braziers=[];structs=[];stones=[];grassD=[];lopProps=[];
   if(ART_LOP){   // LoP: place braziers (light sources) at room centres + scatter to light open zones
     for(var _br=0;_br<map.rooms.length;_br++){var _rm=map.rooms[_br];braziers.push({x:(_rm.cx+0.5)*TS,y:(_rm.cy+0.5)*TS,t:_br*9});}
     var _want=Math.max(8,Math.round(GW*GH/420)),_guard=0;
     while(braziers.length<_want&&_guard++<500){var _bgx=2+(RNG()*(GW-4)|0),_bgy=2+(RNG()*(GH-4)|0);if(map.walkable((_bgx+0.5)*TS,(_bgy+0.5)*TS))braziers.push({x:(_bgx+0.5)*TS,y:(_bgy+0.5)*TS,t:braziers.length*9});}
+    // scenery: a few columns + scattered floor debris (bones/bricks/rocks/barrel/crate)
+    var _nc=Math.max(3,Math.round(map.rooms.length*0.5)),_gc=0;
+    while(_nc>0&&_gc++<300){var _ccx=2+(RNG()*(GW-4)|0),_ccy=2+(RNG()*(GH-4)|0);if(map.walkable((_ccx+0.5)*TS,(_ccy+0.5)*TS)){lopProps.push({name:'column1',x:(_ccx+0.5)*TS,y:(_ccy+0.5)*TS});_nc--;}}
+    var _deb=['bones1','bones2','bricks','rocks','barrel','crate'],_nd=Math.max(12,Math.round(GW*GH/95)),_gd=0;
+    while(_nd>0&&_gd++<900){var _ddx=2+(RNG()*(GW-4)|0),_ddy=2+(RNG()*(GH-4)|0);if(map.walkable((_ddx+0.5)*TS,(_ddy+0.5)*TS)){lopProps.push({name:_deb[RNG()*_deb.length|0],x:(_ddx+0.15+RNG()*0.7)*TS,y:(_ddy+0.15+RNG()*0.7)*TS});_nd--;}}
   }
   portal=isFinale?null:{x:(exitRoom.cx+0.5)*TS,y:(exitRoom.cy+0.5)*TS,t:0};   // the finale has NO rift — the Maiden is the objective
   // populate the zone from its habitat (Allowed_Monsters), area-level scaled, + synergy packs
@@ -807,6 +820,7 @@ function draw(){
   if(portal)D.push({k:(portal.x+portal.y)/TS,draw:drawPortal});
   if(bezel)D.push({k:(bezel.x+bezel.y)/TS,draw:drawBezel});
   for(i=0;i<braziers.length;i++)D.push((function(bz){return{k:(bz.x+bz.y)/TS,draw:function(c,r){drawBrazier(c,r,bz);}};})(braziers[i]));
+  for(i=0;i<lopProps.length;i++)D.push((function(pr){return{k:(pr.x+pr.y)/TS,draw:function(c,r){drawLopProp(c,r,pr);}};})(lopProps[i]));
   for(i=0;i<structs.length;i++)D.push((function(s){return{k:(s.x+s.y)/TS,draw:function(c,r){drawStruct(c,r,s);}};})(structs[i]));
   for(i=0;i<stones.length;i++)D.push((function(s){return{k:(s.x+s.y)/TS,draw:function(c,r){drawStone(c,r,s);}};})(stones[i]));
   for(i=0;i<grassD.length;i++)D.push((function(s){return{k:(s.x+s.y)/TS,draw:function(c,r){drawGrass(c,r,s);}};})(grassD[i]));
