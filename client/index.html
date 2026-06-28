@@ -373,7 +373,10 @@ var LOP_MON={
 var lopStone=ART_LOP?DGC.Assets.texture('art/lords_of_pain/environment/ground_stone1.png',function(){if(map.cells)rebuildGround();}):null;
 var lopOv1=ART_LOP?DGC.Assets.texture('art/lords_of_pain/environment/ground_variation1.png',function(){if(map.cells)rebuildGround();}):null;
 var lopOv2=ART_LOP?DGC.Assets.texture('art/lords_of_pain/environment/ground_variation2.png',function(){if(map.cells)rebuildGround();}):null;
-if(ART_LOP){mr._lop=true;mr._stoneImg=lopStone;FOVRAD=9.5;}   // stone-texture wall cubes + wider torch (bigger 128 tiles, no placed lights yet)
+if(ART_LOP){mr._lop=true;mr._stoneImg=lopStone;FOVRAD=9.5;}   // stone-texture wall cubes + wider torch
+// LoP placed-light prop: animated brazier flame (cropped frames, SE view; anchor from _anchor.json)
+var lopBrazier=null;
+if(ART_LOP){lopBrazier={fr:[],nfr:8,FEET:0.842};for(var _bf=0;_bf<8;_bf++){var _bim=new Image();_bim.src=encodeURI('art/lop_cropped/brazier_lit/SE/brazier_lit_SE_315.0_'+_bf+'.png');lopBrazier.fr.push(_bim);}}
 function rebuildGround(){
   if(ART_LOP){mr.buildGroundLOP(lopStone,lopStone&&lopStone.ready,[lopOv1,lopOv2]);return;}   // LoP ground for ALL depths during eval
   if(depth===0){if(autotileTex&&autotileTex.ready){mr.buildGroundAuto(autotileTex,true,townTileCell);}else{var g=ENVTEX.t_grass;mr.buildGround(g,g&&g.ready,FPATCH,townZoneTex,townZoneClass);}return;}var ftex=curFloorTex();mr.buildGround(ftex,ftex.ready,FPATCH);}
@@ -549,7 +552,8 @@ function spawn(d){
   if(P){P.x=(r0.cx+0.5)*TS;P.y=(r0.cy+0.5)*TS;P.tx=P.x;P.ty=P.y;P.path=null;}
   if(d===0){ // TOWN: lit hub, no foes, Bezel the merchant, NO rift — descend via the granted Portal skill
     for(var ty=0;ty<GH;ty++)for(var tx=0;tx<GW;tx++)SEEN[ty][tx]=true;   // whole town revealed on the minimap
-    bezel={x:30*TS,y:23*TS,t:0};portal=null;braziers=[];
+    bezel={x:30*TS,y:23*TS,t:0};portal=null;
+    braziers=ART_LOP?[{x:26*TS,y:20*TS,t:0},{x:34*TS,y:21*TS,t:24},{x:24*TS,y:27*TS,t:48},{x:36*TS,y:27*TS,t:12},{x:30*TS,y:31*TS,t:36}]:[];   // LoP: light the camp
     for(var rvy=25;rvy<40;rvy++)for(var rvx=0;rvx<10;rvx++)map.block(rvx,rvy);   // TILE_RIVER (X0-10,Y25-40) blocks movement
     var FP=[[28,20,2,2,'campfire'],[30,19,2,1,'chest'],[15,10,3,3,'forge'],[15,30,4,2,'wagon'],[18,28,4,2,'wagon'],[12,28,3,3,'cargo'],[45,30,4,4,'tent'],[40,5,2,2,'sentry'],[48,15,2,2,'sentry']];   // blueprint structures [gx,gy,w,h,kind]
     structs=[];FP.forEach(function(f){for(var yy=f[1];yy<f[1]+f[3];yy++)for(var xx=f[0];xx<f[0]+f[2];xx++)map.block(xx,yy);structs.push({kind:f[4],x:(f[0]+f[2]/2)*TS,y:(f[1]+f[3])*TS,t:0});});
@@ -560,6 +564,11 @@ function spawn(d){
   }
   var zone=ACT1[d]||ACT1[ACT1_LAST],isFinale=(zone.boss===MAIDEN);
   bezel=null;braziers=[];structs=[];stones=[];grassD=[];
+  if(ART_LOP){   // LoP: place braziers (light sources) at room centres + scatter to light open zones
+    for(var _br=0;_br<map.rooms.length;_br++){var _rm=map.rooms[_br];braziers.push({x:(_rm.cx+0.5)*TS,y:(_rm.cy+0.5)*TS,t:_br*9});}
+    var _want=Math.max(8,Math.round(GW*GH/420)),_guard=0;
+    while(braziers.length<_want&&_guard++<500){var _bgx=2+(RNG()*(GW-4)|0),_bgy=2+(RNG()*(GH-4)|0);if(map.walkable((_bgx+0.5)*TS,(_bgy+0.5)*TS))braziers.push({x:(_bgx+0.5)*TS,y:(_bgy+0.5)*TS,t:braziers.length*9});}
+  }
   portal=isFinale?null:{x:(exitRoom.cx+0.5)*TS,y:(exitRoom.cy+0.5)*TS,t:0};   // the finale has NO rift — the Maiden is the objective
   // populate the zone from its habitat (Allowed_Monsters), area-level scaled, + synergy packs
   zonePacks(zone).forEach(function(pk){ En.push(makeMon(pk.type,pk.x,pk.y,d)); });
@@ -734,6 +743,10 @@ function drawBezel(ctx,r){if(!bezel)return;var p=r.project(bezel.x,bezel.y),H=94
   ctx.textAlign='center';ctx.fillStyle='#ffcf5c';ctx.font='600 12px Georgia,serif';ctx.fillText('Bezel',p.x,p.y-H+2);
   if(nearBezel){ctx.globalAlpha=0.82;ctx.fillStyle='#161009';ctx.fillRect(p.x-52,p.y+9,104,18);ctx.globalAlpha=1;ctx.fillStyle='#ffd96b';ctx.font='600 11px system-ui';ctx.fillText('Press F to trade',p.x,p.y+22);}}
 function drawBrazier(ctx,r,bz){var p=r.project(bz.x,bz.y);bz.t=(bz.t||0)+1;var fl=0.72+0.28*Math.sin(bz.t*0.22)+0.08*Math.sin(bz.t*0.5);
+  if(ART_LOP&&lopBrazier){var im=lopBrazier.fr[(bz.t/5|0)%lopBrazier.nfr];
+    ctx.save();ctx.globalCompositeOperation='lighter';var lg=ctx.createRadialGradient(p.x,p.y-34,2,p.x,p.y-34,74*fl);lg.addColorStop(0,'rgba(255,150,60,'+(0.42*fl)+')');lg.addColorStop(1,'rgba(255,140,50,0)');ctx.fillStyle=lg;ctx.beginPath();ctx.arc(p.x,p.y-34,74*fl,0,6.28);ctx.fill();ctx.restore();   // warm pool
+    if(im&&im.complete&&im.naturalWidth){var dh=132,dw=dh*im.naturalWidth/im.naturalHeight;ctx.imageSmoothingEnabled=true;ctx.drawImage(im,(p.x-dw/2)|0,(p.y-dh*lopBrazier.FEET)|0,dw|0,dh|0);}
+    return;}
   ctx.fillStyle='#241d2a';ctx.fillRect((p.x-5)|0,(p.y-20)|0,10,20);ctx.fillStyle='#3a3142';ctx.fillRect((p.x-7)|0,(p.y-22)|0,14,4);  // stone pillar + bowl
   ctx.save();ctx.globalCompositeOperation='lighter';var g=ctx.createRadialGradient(p.x,p.y-24,2,p.x,p.y-24,52*fl);g.addColorStop(0,'rgba(255,164,72,'+(0.5*fl)+')');g.addColorStop(1,'rgba(255,140,50,0)');ctx.fillStyle=g;ctx.beginPath();ctx.arc(p.x,p.y-24,52*fl,0,6.28);ctx.fill();ctx.restore();  // warm pool
   ctx.fillStyle='#ff8a3a';ctx.beginPath();ctx.ellipse(p.x,p.y-25,5,11*fl,0,0,6.28);ctx.fill();ctx.fillStyle='#ffd96b';ctx.beginPath();ctx.ellipse(p.x,p.y-24,2.6,6*fl,0,0,6.28);ctx.fill();}  // flame
@@ -835,10 +848,14 @@ function draw(){
       if(map.cells[lgy][lgx]===1)lctx.drawImage(blobCv,bx2-s/2,by2-WZ-s*0.58/2,s,s*0.58);  // wall cell: also light the RAISED face/top so explored walls stay lit (don't darken into the cell behind)
     }
   }
-  lctx.globalAlpha=1;lctx.globalCompositeOperation='source-over';
+  lctx.globalAlpha=1;
+  // placed braziers: punch a light pool into the darkness around each (explored ones only) so rooms are LIT
+  for(var _lb=0;_lb<braziers.length;_lb++){var _bz=braziers[_lb],_bgx=(_bz.x/TS)|0,_bgy=(_bz.y/TS)|0;if(SEEN&&SEEN[_bgy]&&!SEEN[_bgy][_bgx])continue;var _bp=mr.project(_bz.x,_bz.y),_bx=_bp.x/LSC,_by=(_bp.y-26)/LSC;if(_bx<-50||_by<-50||_bx>LW+50||_by>LH+50)continue;var _rg=lctx.createRadialGradient(_bx,_by,2,_bx,_by,(TS*2.6)/LSC);_rg.addColorStop(0,'rgba(0,0,0,0.92)');_rg.addColorStop(1,'rgba(0,0,0,0)');lctx.fillStyle=_rg;lctx.fillRect(0,0,LW,LH);}
+  lctx.globalCompositeOperation='source-over';
   // warm torch glow — restored to the pre-memory-light look: one warm radial centred on the hero (explored memory-light stays cool/neutral)
   var hs=mr.project(P.x,P.y);
   var wg=lctx.createRadialGradient(hs.x/LSC,hs.y/LSC,2,hs.x/LSC,hs.y/LSC,(TS*3.2)/LSC);wg.addColorStop(0,'rgba(255,150,70,0.17)');wg.addColorStop(1,'rgba(255,150,70,0)');lctx.fillStyle=wg;lctx.fillRect(0,0,LW,LH);
+  for(var _wb=0;_wb<braziers.length;_wb++){var _wz=braziers[_wb],_wgx=(_wz.x/TS)|0,_wgy=(_wz.y/TS)|0;if(SEEN&&SEEN[_wgy]&&!SEEN[_wgy][_wgx])continue;var _wp=mr.project(_wz.x,_wz.y),_wx=_wp.x/LSC,_wy=(_wp.y-30)/LSC;if(_wx<-50||_wy<-50||_wx>LW+50||_wy>LH+50)continue;var _wfl=0.8+0.2*Math.sin((_wz.t||0)*0.2),_wrg=lctx.createRadialGradient(_wx,_wy,2,_wx,_wy,(TS*3.0)/LSC);_wrg.addColorStop(0,'rgba(255,150,70,'+(0.24*_wfl)+')');_wrg.addColorStop(1,'rgba(255,150,70,0)');lctx.fillStyle=_wrg;lctx.fillRect(0,0,LW,LH);}   // warm glow at each placed brazier
   if(location.search.indexOf('bright')<0&&(depth!==0||ART_LOP)){ctx.imageSmoothingEnabled=true;ctx.filter='blur(6px)';ctx.drawImage(lightCv,0,0,LW,LH,0,0,CW,CH);ctx.filter='none';}  // torch darkness (full-LoP also darkens town for mood)
   if(depth>0){var _zt=({wilderness:'rgba(74,82,52,0.07)',cave:'rgba(64,46,34,0.11)',forest:'rgba(34,72,42,0.12)',marsh:'rgba(56,78,46,0.13)',graveyard:'rgba(72,84,104,0.10)',dungeon:'rgba(44,32,58,0.06)'})[((ACT1[depth]&&ACT1[depth].type)||'').toLowerCase()];if(_zt){ctx.fillStyle=_zt;ctx.fillRect(0,0,CW,CH);}}  // per-zone-type ambient mood wash
   ctx.restore();   // end world view-zoom — HUD below draws at 1x

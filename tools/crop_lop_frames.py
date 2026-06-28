@@ -53,7 +53,7 @@ def main():
     else:
         cdir, cat = find_char_dir(char)
         if not cdir: print("character not found:", char); sys.exit(1)
-    frames = sorted(glob.glob(os.path.join(cdir, "*", "*", "*.png")))
+    frames = sorted(glob.glob(os.path.join(cdir, "**", "*.png"), recursive=True))   # recursive: handles char (group/dir/file) AND prop (dir/file) layouts
     if not frames:
         print("no frames under", cdir); sys.exit(1)
 
