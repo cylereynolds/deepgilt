@@ -204,18 +204,27 @@
     var L = iso.isoC(gx, gy + 1), B = iso.isoC(gx + 1, gy + 1), R = iso.isoC(gx + 1, gy), T = iso.isoC(gx, gy);
     var Lx = L.x - cx, Ly = L.y - cy, Bx = B.x - cx, By = B.y - cy, Rx = R.x - cx, Ry = R.y - cy, Tx = T.x - cx, Ty = T.y - cy;
     var lop = this._lop && this._stoneImg && this._stoneImg.complete && this._stoneImg.naturalWidth;
-    // real LoP wall art: a stone-block SEGMENT billboard per cell, oriented by the wall's run.
-    // grid-X run projects to a screen "\" -> the wall2 SW art ("\"); grid-Y run projects to a
-    // screen "/" -> the wall2 SE art ("/"). Floor is laid under visible walls, so the segment
-    // sits on stone (no black gaps); collision is unchanged.
+    // real LoP wall art: a stone-block SEGMENT billboard per cell. Two things matter:
+    //  (a) ORIENTATION — the billboard faces the OPEN FLOOR it borders, so walls form corners
+    //      and enclosed rooms instead of all running one way:
+    //        open floor on a grid-Y (N/S) side  => wall is a grid-X run => screen "\" => SW art
+    //        open floor on a grid-X (E/W) side  => wall is a grid-Y run => screen "/" => SE art
+    //      (Detecting by adjacent WALLS was wrong: outside a room is ALL wall, so both axes
+    //       nearly always matched and every cell picked one sprite — the "all same way" bug.)
+    //  (b) GROUND SEAT — wall2 art is a 256² frame whose OPAQUE block is x[79..195] y[76..163]
+    //      (base-centre native (137,163)). Anchoring that base at the diamond CENTRE made walls
+    //      float ~half a tile; it must sit on the diamond FRONT (cc + TH/2) to rise from the floor.
     if (lop && this._wallSE && this._wallSE.complete && this._wallSE.naturalWidth) {
-      var map = this.map, GWn = map.GW, GHn = map.GH, cl = map.cells;
-      var ew = ((gx > 0 && cl[gy][gx - 1] === 1) || (gx < GWn - 1 && cl[gy][gx + 1] === 1));
-      var ns = ((gy > 0 && cl[gy - 1][gx] === 1) || (gy < GHn - 1 && cl[gy + 1][gx] === 1));
-      var wimg = (ns && !ew) ? this._wallSE : this._wallSW;
-      var cc = iso.isoC(gx + 0.5, gy + 0.5), ccx = cc.x - cx, ccy = cc.y - cy, FW = 256 * 1.08;
+      var cl = this.map.cells, GWn = this.map.GW, GHn = this.map.GH;
+      var fEW = (gx > 0 && cl[gy][gx - 1] === 0) || (gx < GWn - 1 && cl[gy][gx + 1] === 0);   // floor E/W -> grid-Y run -> "/"
+      var fNS = (gy > 0 && cl[gy - 1][gx] === 0) || (gy < GHn - 1 && cl[gy + 1][gx] === 0);   // floor N/S -> grid-X run -> "\"
+      var wimg = (fEW && !fNS) ? this._wallSE : this._wallSW;   // straight edges decide; corners/ambiguous default to SW "\"
+      var SCALE = 1.10, DF = 256 * SCALE, BCX = 137, BCY = 163;   // draw scale + measured opaque base-centre
+      var cc = iso.isoC(gx + 0.5, gy + 0.5);
+      var ax = (cc.x - cx) - BCX * SCALE;                         // place the art's base-centre...
+      var ay = (cc.y - cy + iso.TH * 0.5) - BCY * SCALE;          // ...on the diamond FRONT vertex (cc + TH/2)
       ctx.imageSmoothingEnabled = true;
-      ctx.drawImage(wimg, (ccx - 0.52 * FW) | 0, (ccy - 0.63 * FW) | 0, FW | 0, FW | 0);   // anchor segment base-centre at the cell centre
+      ctx.drawImage(wimg, ax | 0, ay | 0, DF | 0, DF | 0);
       return;
     }
     var pat = null; if (lop) { if (!this._wallPat) this._wallPat = ctx.createPattern(this._stoneImg, 'repeat'); pat = this._wallPat; }
