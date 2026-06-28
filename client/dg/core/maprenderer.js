@@ -204,14 +204,15 @@
     var L = iso.isoC(gx, gy + 1), B = iso.isoC(gx + 1, gy + 1), R = iso.isoC(gx + 1, gy), T = iso.isoC(gx, gy);
     var Lx = L.x - cx, Ly = L.y - cy, Bx = B.x - cx, By = B.y - cy, Rx = R.x - cx, Ry = R.y - cy, Tx = T.x - cx, Ty = T.y - cy;
     var lop = this._lop && this._stoneImg && this._stoneImg.complete && this._stoneImg.naturalWidth;
-    // real LoP wall art: a stone-block SEGMENT billboard per cell, oriented by the wall's run
-    // (grid-X run -> SE-axis piece, grid-Y run -> SW-axis piece). Floor is laid under visible
-    // walls, so the segment sits on stone (no black gaps); collision is unchanged.
+    // real LoP wall art: a stone-block SEGMENT billboard per cell, oriented by the wall's run.
+    // grid-X run projects to a screen "\" -> the wall2 SW art ("\"); grid-Y run projects to a
+    // screen "/" -> the wall2 SE art ("/"). Floor is laid under visible walls, so the segment
+    // sits on stone (no black gaps); collision is unchanged.
     if (lop && this._wallSE && this._wallSE.complete && this._wallSE.naturalWidth) {
       var map = this.map, GWn = map.GW, GHn = map.GH, cl = map.cells;
       var ew = ((gx > 0 && cl[gy][gx - 1] === 1) || (gx < GWn - 1 && cl[gy][gx + 1] === 1));
       var ns = ((gy > 0 && cl[gy - 1][gx] === 1) || (gy < GHn - 1 && cl[gy + 1][gx] === 1));
-      var wimg = (ns && !ew) ? this._wallSW : this._wallSE;
+      var wimg = (ns && !ew) ? this._wallSE : this._wallSW;
       var cc = iso.isoC(gx + 0.5, gy + 0.5), ccx = cc.x - cx, ccy = cc.y - cy, FW = 256 * 1.08;
       ctx.imageSmoothingEnabled = true;
       ctx.drawImage(wimg, (ccx - 0.52 * FW) | 0, (ccy - 0.63 * FW) | 0, FW | 0, FW | 0);   // anchor segment base-centre at the cell centre
