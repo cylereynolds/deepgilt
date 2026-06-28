@@ -215,10 +215,11 @@
     this.camY = Math.max(0, Math.min(iso.GCH - CH, hi.y - CH / 2));
     if (this.ground) ctx.drawImage(this.ground, this.camX, this.camY, CW, CH, 0, 0, CW, CH);
     var R = [], cx = this.camX, cy = this.camY;
+    var mX = iso.TW, mTop = iso.TH * 2 + iso.WALLZ, mBot = iso.TH * 2;        // cull margins scale with tile/wall size (was 48/72/48 @ TW64) — tall walls don't pop at the top edge
     for (var gy = 0; gy < map.GH; gy++) for (var gx = 0; gx < map.GW; gx++) {
       if (map.cells[gy][gx] !== 1 || !map.wallVisible(gx, gy)) continue;
       var c = iso.isoC(gx + 0.5, gy + 0.5), sx = c.x - cx, sy = c.y - cy;
-      if (sx < -48 || sx > CW + 48 || sy < -72 || sy > CH + 48) continue;  // cull walls outside the visible window (not a fixed cell radius) — no more pop-out at distance
+      if (sx < -mX || sx > CW + mX || sy < -mTop || sy > CH + mBot) continue;  // cull walls outside the visible window (not a fixed cell radius) — no more pop-out at distance
       R.push({ k: gx + gy + 1, w: 1, gx: gx, gy: gy });
     }
     for (var i = 0; i < drawables.length; i++) R.push(drawables[i]);

@@ -4,7 +4,7 @@
 // projection for a "ground canvas" whose origin is offset so all coords are >= 0.
 (function () {
   function Iso(GW, GH, TS) {
-    var TW = 64, TH = 32, WALLZ = 30;          // diamond tile w/h on screen; wall height
+    var TW = 128, TH = 64, WALLZ = 60;          // diamond tile w/h on screen; wall height (128/64 = LoP-native scale, was 64/32)
     var OX = GH * (TW / 2) + TW / 2, OY = WALLZ + TH;            // ground-canvas origin offset
     var GCW = (GW + GH) * (TW / 2) + TW, GCH = (GW + GH) * (TH / 2) + OY + TH;
     function isoC(gx, gy) { return { x: (gx - gy) * (TW / 2) + OX, y: (gx + gy) * (TH / 2) + OY }; }
