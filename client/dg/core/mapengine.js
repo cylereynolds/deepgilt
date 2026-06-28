@@ -31,7 +31,7 @@
       if (rng() < 0.5) { this.carveH(c, a.cx, b.cx, a.cy); this.carveV(c, a.cy, b.cy, b.cx); }
       else { this.carveV(c, a.cy, b.cy, a.cx); this.carveH(c, a.cx, b.cx, b.cy); }
     }
-    this.cells = c; this.rooms = rooms;
+    this.cells = c; this.rooms = rooms; this.solid = null;   // clear any stale solid[] from a prior town (different GW stride)
     // entrance = room 0; exit = the room farthest from it, turned into a stamped vault chamber
     var r0 = rooms[0], exit = r0, bd = -1;
     for (var e = 0; e < rooms.length; e++) { var rm = rooms[e], dd = (rm.cx - r0.cx) * (rm.cx - r0.cx) + (rm.cy - r0.cy) * (rm.cy - r0.cy); if (dd > bd) { bd = dd; exit = rm; } }
@@ -112,6 +112,7 @@
     var c = []; for (y = 0; y < this.GH; y++) { c[y] = []; for (x = 0; x < this.GW; x++) c[y][x] = 1; }
     for (y = 0; y < R.GH; y++) for (x = 0; x < R.GW; x++) if (oy + y < this.GH && ox + x < this.GW) c[oy + y][ox + x] = R.cells[y][x];
     this.cells = c;
+    this.solid = null;   // dungeons use cells[] only; clear any stale town solid[] (its GW stride differs -> phantom collision)
 
     // translate rooms/specials/entrance/exit into engine cell space
     var rooms = R.rooms.map(function (r) { return { x: r.x + ox, y: r.y + oy, w: r.w, h: r.h, cx: r.cx + ox, cy: r.cy + oy }; });
