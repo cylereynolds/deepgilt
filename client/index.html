@@ -373,10 +373,7 @@ var LOP_MON={
 var lopStone=ART_LOP?DGC.Assets.texture('art/lords_of_pain/environment/ground_stone1.png',function(){if(map.cells)rebuildGround();}):null;
 var lopOv1=ART_LOP?DGC.Assets.texture('art/lords_of_pain/environment/ground_variation1.png',function(){if(map.cells)rebuildGround();}):null;
 var lopOv2=ART_LOP?DGC.Assets.texture('art/lords_of_pain/environment/ground_variation2.png',function(){if(map.cells)rebuildGround();}):null;
-if(ART_LOP){mr._lop=true;mr._stoneImg=lopStone;FOVRAD=9.5;
-  var lopWallSE=new Image();lopWallSE.src=encodeURI('art/lords_of_pain/prop/wall2/SE/wall2_SE_315.0_0.png');   // tall stone wall segment, SE-axis
-  var lopWallSW=new Image();lopWallSW.src=encodeURI('art/lords_of_pain/prop/wall2/SW/wall2_SW_225.0_0.png');   // SW-axis
-  mr._wallSE=lopWallSE;mr._wallSW=lopWallSW;}
+if(ART_LOP){mr._lop=true;mr._stoneImg=lopStone;FOVRAD=9.5;}   // walls = LoP-stone-textured iso cubes (drawWallIso); the pack's flat wall BEAM art can't read as a grounded room wall
 // LoP placed-light prop: animated brazier flame (cropped frames, SE view; anchor from _anchor.json)
 var lopBrazier=null,lopServant=null,lopGold=null;
 if(ART_LOP){lopBrazier={fr:[],nfr:8,FEET:0.842};for(var _bf=0;_bf<8;_bf++){var _bim=new Image();_bim.src=encodeURI('art/lop_cropped/brazier_lit/SE/brazier_lit_SE_315.0_'+_bf+'.png');lopBrazier.fr.push(_bim);}

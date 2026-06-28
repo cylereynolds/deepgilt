@@ -196,46 +196,26 @@
   // world px -> screen px (valid after camera is set in render())
   P.project = function (wx, wy) { var p = this.iso.w2i(wx, wy); return { x: p.x - this.camX, y: p.y - this.camY }; };
 
-  // one iso wall cube at grid (gx,gy): SW face + SE face + raised top diamond.
-  // Under _lop, the cube faces are filled with the LoP stone pattern (+ per-face shade) so walls
-  // read as dark stone instead of the flat purple placeholder cubes.
+  // one iso wall BLOCK at grid (gx,gy): SW + SE front faces + raised top diamond, rising WALLZ high.
+  // Under _lop the faces are filled with the LoP stone pattern (per-face shading) so each wall cell
+  // is a solid stone cube whose base sits ON its floor diamond (grounded by construction) and whose
+  // shared edges with neighbouring wall cells form continuous walls, corners and enclosed rooms with
+  // NO per-cell orientation guessing. (A flat wall2 BEAM billboard was tried but the pack's wall art
+  // is a low lying segment — it can't read as a room wall: it floated and looked uni-directional.)
   P.drawWallIso = function (ctx, gx, gy) {
     var iso = this.iso, cx = this.camX, cy = this.camY, h = iso.WALLZ;
     var L = iso.isoC(gx, gy + 1), B = iso.isoC(gx + 1, gy + 1), R = iso.isoC(gx + 1, gy), T = iso.isoC(gx, gy);
     var Lx = L.x - cx, Ly = L.y - cy, Bx = B.x - cx, By = B.y - cy, Rx = R.x - cx, Ry = R.y - cy, Tx = T.x - cx, Ty = T.y - cy;
     var lop = this._lop && this._stoneImg && this._stoneImg.complete && this._stoneImg.naturalWidth;
-    // real LoP wall art: a stone-block SEGMENT billboard per cell. Two things matter:
-    //  (a) ORIENTATION — the billboard faces the OPEN FLOOR it borders, so walls form corners
-    //      and enclosed rooms instead of all running one way:
-    //        open floor on a grid-Y (N/S) side  => wall is a grid-X run => screen "\" => SW art
-    //        open floor on a grid-X (E/W) side  => wall is a grid-Y run => screen "/" => SE art
-    //      (Detecting by adjacent WALLS was wrong: outside a room is ALL wall, so both axes
-    //       nearly always matched and every cell picked one sprite — the "all same way" bug.)
-    //  (b) GROUND SEAT — wall2 art is a 256² frame whose OPAQUE block is x[79..195] y[76..163]
-    //      (base-centre native (137,163)). Anchoring that base at the diamond CENTRE made walls
-    //      float ~half a tile; it must sit on the diamond FRONT (cc + TH/2) to rise from the floor.
-    if (lop && this._wallSE && this._wallSE.complete && this._wallSE.naturalWidth) {
-      var cl = this.map.cells, GWn = this.map.GW, GHn = this.map.GH;
-      var fEW = (gx > 0 && cl[gy][gx - 1] === 0) || (gx < GWn - 1 && cl[gy][gx + 1] === 0);   // floor E/W -> grid-Y run -> "/"
-      var fNS = (gy > 0 && cl[gy - 1][gx] === 0) || (gy < GHn - 1 && cl[gy + 1][gx] === 0);   // floor N/S -> grid-X run -> "\"
-      var wimg = (fEW && !fNS) ? this._wallSE : this._wallSW;   // straight edges decide; corners/ambiguous default to SW "\"
-      var SCALE = 1.10, DF = 256 * SCALE, BCX = 137, BCY = 163;   // draw scale + measured opaque base-centre
-      var cc = iso.isoC(gx + 0.5, gy + 0.5);
-      var ax = (cc.x - cx) - BCX * SCALE;                         // place the art's base-centre...
-      var ay = (cc.y - cy + iso.TH * 0.5) - BCY * SCALE;          // ...on the diamond FRONT vertex (cc + TH/2)
-      ctx.imageSmoothingEnabled = true;
-      ctx.drawImage(wimg, ax | 0, ay | 0, DF | 0, DF | 0);
-      return;
-    }
     var pat = null; if (lop) { if (!this._wallPat) this._wallPat = ctx.createPattern(this._stoneImg, 'repeat'); pat = this._wallPat; }
     function face(pts, base, tint) {
       ctx.beginPath(); ctx.moveTo(pts[0], pts[1]); for (var i = 2; i < pts.length; i += 2) ctx.lineTo(pts[i], pts[i + 1]); ctx.closePath();
       ctx.fillStyle = lop ? pat : base; ctx.fill();
       if (lop) { ctx.fillStyle = tint; ctx.fill(); }
     }
-    face([Lx, Ly, Bx, By, Bx, By - h, Lx, Ly - h], '#171320', 'rgba(4,3,6,0.58)');      // SW face (darkest)
-    face([Bx, By, Rx, Ry, Rx, Ry - h, Bx, By - h], '#241f2e', 'rgba(8,6,11,0.34)');      // SE face (mid)
-    face([Tx, Ty - h, Rx, Ry - h, Bx, By - h, Lx, Ly - h], '#332d3e', 'rgba(18,13,20,0.10)'); // top (lightest)
+    face([Lx, Ly, Bx, By, Bx, By - h, Lx, Ly - h], '#171320', 'rgba(0,0,0,0.42)');      // SW face (most shadowed)
+    face([Bx, By, Rx, Ry, Rx, Ry - h, Bx, By - h], '#241f2e', 'rgba(0,0,0,0.22)');      // SE face (mid)
+    face([Tx, Ty - h, Rx, Ry - h, Bx, By - h, Lx, Ly - h], '#332d3e', 'rgba(0,0,0,0.02)'); // top (lit)
     ctx.strokeStyle = lop ? 'rgba(20,16,12,0.55)' : 'rgba(150,140,110,0.16)'; ctx.lineWidth = 1; ctx.stroke();
   };
 
